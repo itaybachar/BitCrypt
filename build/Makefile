@@ -174,6 +174,19 @@ Blake2/fast:
 	$(MAKE) -f src\Argon2\blake2\CMakeFiles\Blake2.dir\build.make src/Argon2/blake2/CMakeFiles/Blake2.dir/build
 .PHONY : Blake2/fast
 
+#=============================================================================
+# Target rules for targets named AES
+
+# Build rule for target.
+AES: cmake_check_build_system
+	$(MAKE) -f CMakeFiles\Makefile2 AES
+.PHONY : AES
+
+# fast build rule for target.
+AES/fast:
+	$(MAKE) -f src\AES\CMakeFiles\AES.dir\build.make src/AES/CMakeFiles/AES.dir/build
+.PHONY : AES/fast
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -187,6 +200,7 @@ help:
 	@echo ... BitCrypt
 	@echo ... Argon
 	@echo ... Blake2
+	@echo ... AES
 .PHONY : help
 
 
