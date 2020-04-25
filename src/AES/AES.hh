@@ -10,15 +10,15 @@ private:
   uint8_t _Nr;
   uint32_t block_byte_size;
 private:
-  void _addRoundKey();
+  void _addRoundKey(uint8_t** state, uint8_t* w);
 
-  void _subBytes();
+  void _subBytes(uint8_t** state);
   void _invSubBytes();
 
-  void _shiftRows();
+  void _shiftRows(uint8_t** state);
   void _invShiftRows();
 
-  void _mixCols();
+  void _mixCols(uint8_t** state);
   void _invMixCols();
 
   void _encryptBlock(uint8_t in[], uint8_t out[], uint8_t key[]);
@@ -33,12 +33,14 @@ private:
   void _xorWord(uint8_t left[], uint8_t right[], uint8_t out[]);
 
   uint8_t _xtime(uint8_t x);
+  uint8_t _mulBytes(uint8_t a, uint8_t b);
   void _Rcon(uint8_t arr[], uint8_t n);
 
-  void print(uint8_t w[]);
+  void printState(uint8_t** w);
+  void printWord(uint8_t* w);
 public:
   AES(uint8_t key_len);
-  uint8_t* encrypt(uint8_t in[], uint32_t in_len, uint8_t key[], uint8_t* out_len);
+  uint8_t* encrypt(uint8_t in[], uint32_t in_len, uint8_t key[], uint32_t* out_len);
 
 };
 
