@@ -1,7 +1,7 @@
 #include <AES.hh>
 #include <cstring>
 
-AES::AES(uint8_t key_len):
+AES::AES(uint32_t key_len):
   _Nb(4)
 {
   this->_Nk = key_len/32;
@@ -117,7 +117,7 @@ void AES::_keyExpansion(uint8_t key[], uint8_t w[]){
     }
 
     //Xor previous word with temp to create new word
-    _xorWord(w+i-4*this->_Nb,temp,w+i);
+    _xorWord(w+i-4*this->_Nk,temp,w+i);
 
     i+=4;
   }

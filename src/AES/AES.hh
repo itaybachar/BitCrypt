@@ -39,7 +39,7 @@ private:
   void printState(uint8_t** w);
   void printWord(uint8_t* w);
 public:
-  AES(uint8_t key_len);
+  AES(uint32_t key_len);
   uint8_t* encrypt(uint8_t in[], uint32_t in_len, uint8_t key[], uint32_t* out_len);
 
 };
