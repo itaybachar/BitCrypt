@@ -72,7 +72,11 @@ uint8_t* AES::_mapPaddedInput(uint8_t in[], uint32_t in_len, uint32_t padded_len
   return padded;
 }
 
-uint8_t* AES::encrypt(uint8_t in[], uint32_t in_len, uint8_t key[], uint32_t* out_len){
+uint8_t* AES::encrypt(uint8_t in[], uint32_t in_len, uint8_t key[], uint8_t key_len, uint32_t* out_len){
+
+  if(!_keyCheck(key_len))
+    return nullptr;
+
   *out_len = _calcPadding(in_len);
   uint8_t* paddedInput = _mapPaddedInput(in,in_len,*out_len);
   uint8_t* out = new uint8_t[*out_len];  
@@ -85,6 +89,25 @@ uint8_t* AES::encrypt(uint8_t in[], uint32_t in_len, uint8_t key[], uint32_t* ou
   return out;
 }
 
+uint8_t* AES::decrypt(uint8_t in[], uint32_t in_len, uint8_t key[], uint8_t key_len, uint32_t* out_len){
+
+  if(!_keyCheck(key_len))
+    return nullptr;
+
+  *out_len = _calcPadding(in_len);
+  if(*out_len != in_len){
+    puts("ERR: INVALID_INPUT_FILE");
+    return nullptr;
+  }
+
+  uint8_t* out = new uint8_t[*out_len];  
+
+  for(uint32_t i = 0; i<*out_len;i+= this->block_byte_size){
+    _decryptBlock(in+i,out+i,key);
+  }
+
+  return out;
+}
 
 void AES::_keyExpansion(uint8_t key[], uint8_t w[]){
 
@@ -246,5 +269,79 @@ void AES::_addRoundKey(uint8_t** state,uint8_t*w){
     for(uint8_t c = 0; c< this->_Nb;c++){
       state[r][c] = state[r][c] ^ w[r+c*4];
     }
+  }
+}
+
+bool AES::_keyCheck(uint8_t len){
+  if(this->_Nk*4 != len){
+    puts("ERR: INVALID_KEY_LEN");
+    return false;
+  } else return true;
+}
+
+void AES::_decryptBlock(uint8_t in[], uint8_t out[], uint8_t key[]){
+  uint8_t* w = new uint8_t[4 * this->_Nb*(this->_Nr+1)];
+  _keyExpansion(key,w);
+
+  uint8_t** state = new uint8_t*[4];
+  state[0] = new uint8_t[4*this->_Nb];
+  for(uint8_t i = 0; i<this->_Nb;i++){
+    state[i] = state[0] + i*this->_Nb;
+  }
+
+  //Map input to a 2D state
+  for(int i = 0; i<4;i++){
+    for(int j = 0; j<this->_Nb; j++){
+      state[i][j] = in[i+ 4*j];
+    }
+  }
+
+  _addRoundKey(state,w+(4*this->_Nb*(this->_Nr)));
+  for(int i = this->_Nr-1; i>0;i--){
+    _invShiftRows(state);
+    _invSubBytes(state);
+    _addRoundKey(state,w+(i*4*this->_Nb));
+    _invMixCols(state);
+  }
+  _invShiftRows(state);
+  _invSubBytes(state);
+  _addRoundKey(state,w);
+
+  for(uint8_t r = 0 ; r<4;r++){
+    for(uint8_t c = 0; c<this->_Nb;c++){
+      out[r+c*4] = state[r][c];
+    }
+  }
+}
+
+void AES::_invShiftRows(uint8_t** state){
+  for(uint8_t i = 1; i<4;i++){
+    for(int8_t count = 4-i; count>0;count--)
+      _rotWord(state[i]);
+  }
+}
+
+void AES::_invSubBytes(uint8_t** state){
+  for(uint8_t i = 0; i<4; i++){
+    for(uint8_t j = 0; j<this->_Nb;j++){
+      state[i][j] = inv_sbox[state[i][j]/16][state[i][j]%16];
+    }
+  }
+}
+
+void AES::_invMixCols(uint8_t** state){
+  uint8_t res[4];
+  for(uint8_t c = 0;c<this->_Nb;c++){
+    //Multiply and Add
+    res[0] = _mulBytes(0x0e,state[0][c]) ^ _mulBytes(0x0b,state[1][c]) ^ _mulBytes(0x0d,state[2][c]) ^ _mulBytes(0x09,state[3][c]);
+    res[1] = _mulBytes(0x09,state[0][c]) ^ _mulBytes(0x0e,state[1][c]) ^ _mulBytes(0x0b,state[2][c]) ^ _mulBytes(0x0d,state[3][c]);
+    res[2] = _mulBytes(0x0d,state[0][c]) ^ _mulBytes(0x09,state[1][c]) ^ _mulBytes(0x0e,state[2][c]) ^ _mulBytes(0x0b,state[3][c]);
+    res[3] = _mulBytes(0x0b,state[0][c]) ^ _mulBytes(0x0d,state[1][c]) ^ _mulBytes(0x09,state[2][c]) ^ _mulBytes(0x0e,state[3][c]);
+
+    //Update state
+    state[0][c] = res[0];
+    state[1][c] = res[1];
+    state[2][c] = res[2];
+    state[3][c] = res[3];
   }
 }

@@ -4,7 +4,7 @@ project(BitCrypt)
 #Custom Commands
 ADD_CUSTOM_TARGET(debug
         COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Debug ${CMAKE_SOURCE_DIR}
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target all -msha
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target all
         COMMENT "Switch CMAKE_BUILD_TYPE to Debug"
         )
 
@@ -15,7 +15,7 @@ ADD_CUSTOM_TARGET(release
         )
 
 #Set Default Compiler
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/out)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msha -msse4.1 -mssse3 -Wpsabi -m32")
 add_subdirectory(src)

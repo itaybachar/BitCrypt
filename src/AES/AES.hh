@@ -9,20 +9,24 @@ private:
   uint8_t _Nk;
   uint8_t _Nr;
   uint32_t block_byte_size;
+ // inline static constexpr uint8_t INVALID_KEY_LEN = 10;
+ // inline static constexpr uint8_t INVALID_INPUT_FILE = 11;
 private:
+  bool _keyCheck(uint8_t len);
+
   void _addRoundKey(uint8_t** state, uint8_t* w);
 
   void _subBytes(uint8_t** state);
-  void _invSubBytes();
+  void _invSubBytes(uint8_t** state);
 
   void _shiftRows(uint8_t** state);
-  void _invShiftRows();
+  void _invShiftRows(uint8_t** state);
 
   void _mixCols(uint8_t** state);
-  void _invMixCols();
+  void _invMixCols(uint8_t** state);
 
   void _encryptBlock(uint8_t in[], uint8_t out[], uint8_t key[]);
-  void _decryptBlock();
+  void _decryptBlock(uint8_t in[], uint8_t out[], uint8_t key[]);
 
   uint32_t _calcPadding(uint32_t in_len);
   uint8_t* _mapPaddedInput(uint8_t in[], uint32_t in_len, uint32_t padded_len);
@@ -40,7 +44,9 @@ private:
   void printWord(uint8_t* w);
 public:
   AES(uint32_t key_len);
-  uint8_t* encrypt(uint8_t in[], uint32_t in_len, uint8_t key[], uint32_t* out_len);
+  uint8_t* encrypt(uint8_t in[], uint32_t in_len, uint8_t key[],uint8_t key_len, uint32_t* out_len);
+
+  uint8_t* decrypt(uint8_t in[], uint32_t in_len, uint8_t key[],uint8_t key_len, uint32_t* out_len);
 
 };
 
