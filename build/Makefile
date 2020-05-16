@@ -208,6 +208,19 @@ AES/fast:
 	$(MAKE) $(MAKESILENT) -f src/AES/CMakeFiles/AES.dir/build.make src/AES/CMakeFiles/AES.dir/build
 .PHONY : AES/fast
 
+#=============================================================================
+# Target rules for targets named Util
+
+# Build rule for target.
+Util: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Util
+.PHONY : Util
+
+# fast build rule for target.
+Util/fast:
+	$(MAKE) $(MAKESILENT) -f src/Util/CMakeFiles/Util.dir/build.make src/Util/CMakeFiles/Util.dir/build
+.PHONY : Util/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -222,6 +235,7 @@ help:
 	@echo "... Argon"
 	@echo "... BitCrypt"
 	@echo "... Blake2"
+	@echo "... Util"
 .PHONY : help
 
 
