@@ -87,7 +87,7 @@ int32_t FileEditor::writeBytes(uint8_t* buf, uint32_t numBytes){
     this->flags = O_WRONLY;
     if(this->truncate)
       this->flags |= O_TRUNC;
-
+    else this->flags |= O_APPEND;
     this->fd = open(this->filepath,this->flags);
   }
 

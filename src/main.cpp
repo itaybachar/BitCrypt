@@ -15,21 +15,16 @@ void FileTest(){
   char text[] = "GET WIPED SON!";
 
   FileEditor fedit;
-  if(fedit.loadFile(file)){
+  if(fedit.loadFile(file,false)){
     int32_t readNum = fedit.readBytes(buf,fedit.fileSize()); 
     for(int32_t i = 0; i<readNum; i++){
       std::cout<<char(buf[i]);
     } 
     fedit.writeBytes((uint8_t*)text,14);
-    fedit.writeBytes((uint8_t*)text,14);
-    fedit.loadFile(file);
-    readNum = fedit.readBytes(buf,fedit.fileSize()); 
-    for(int32_t i = 0; i<readNum; i++){
-      std::cout<<char(buf[i]);
-    } 
-  }
-
+  } 
 }
+
+
 
 void AESTests(){
 #if 0
