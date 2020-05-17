@@ -28,4 +28,6 @@ public:
   bool wipeFile();
   uint32_t fileSize();
   uint32_t filePointerLoc();
+
+  inline uint8_t* getBuffer() { return this->buf; }
 };

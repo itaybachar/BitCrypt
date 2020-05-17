@@ -16,13 +16,14 @@ FileEditor::FileEditor():
   size(0),
   loc(0),
   truncate(true),
-  flags(0) {}
+  flags(0)
+{}
 
-  FileEditor::~FileEditor(){
-    _closeFile();
+FileEditor::~FileEditor(){
+  _closeFile();
 
-    delete[] buf;
-  }
+  delete[] buf;
+}
 
 //Loads a file and sets class variables
 bool FileEditor::loadFile(const char filepath[], bool truncate){

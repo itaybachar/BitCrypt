@@ -15,6 +15,8 @@ AES::AES(uint32_t key_len):
     case 8:
       this->_Nr = 14;
       break;
+    default:
+      throw std::runtime_error("Bad Key Length");
   }
   this->block_byte_size = this->_Nb * 4;
 }

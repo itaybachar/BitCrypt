@@ -10,7 +10,10 @@ int main(){
 }
 
 void bcryptTest(){
-  BitCrypt b(AES_192);
+  BitCrypt b(AES_128);
+  const char file[] = "/home/itay/Desktop/Thing";
+  b.encryptFile(file,"HIE",3);
+  //b.decryptFile(file,"HIE",3);
 }
 
 void FileTest(){
