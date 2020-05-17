@@ -221,6 +221,19 @@ Util/fast:
 	$(MAKE) $(MAKESILENT) -f src/Util/CMakeFiles/Util.dir/build.make src/Util/CMakeFiles/Util.dir/build
 .PHONY : Util/fast
 
+#=============================================================================
+# Target rules for targets named Crypt
+
+# Build rule for target.
+Crypt: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Crypt
+.PHONY : Crypt
+
+# fast build rule for target.
+Crypt/fast:
+	$(MAKE) $(MAKESILENT) -f src/Crypt/CMakeFiles/Crypt.dir/build.make src/Crypt/CMakeFiles/Crypt.dir/build
+.PHONY : Crypt/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -235,6 +248,7 @@ help:
 	@echo "... Argon"
 	@echo "... BitCrypt"
 	@echo "... Blake2"
+	@echo "... Crypt"
 	@echo "... Util"
 .PHONY : help
 

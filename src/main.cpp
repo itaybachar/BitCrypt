@@ -1,12 +1,16 @@
 #include <AES.hh>
 #include <FileEditor.hh>
-#include <string.h>
+#include <BitCrypt.hh>
 
-void AESTests(), FileTest();
+void AESTests(), FileTest(), bcryptTest();
 
 int main(){
-  FileTest();
+  bcryptTest();
   return 0;
+}
+
+void bcryptTest(){
+  BitCrypt b(AES_192);
 }
 
 void FileTest(){
