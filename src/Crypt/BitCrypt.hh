@@ -31,5 +31,23 @@ public:
   //Open File
   //
 
+/*
+  fe.loadFile();
+  fe.readBytes(,1)
+  //Code for key len
+  fe.readBytes(,32)//max
+  //If found key size
+  aes.decrypt(buf)
+  checkHash(pass,buf)
+    outlen = readBytes(,fe.fileSize())
+    clearFile()
+    written = writeBytes(dec,outSize);
 
+  //Could not find key len, assume is decrypted
+  readNum = de.read(,fe.size())
+  out[] = new [1 + hashSize + readNum]
+  encsize = aes.enc(&buf[1],hashedpass) //Skip first byte of header
+  clearFile();
+  fe.write(out,encsize);
+   */
 };

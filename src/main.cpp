@@ -1,5 +1,6 @@
 #include <AES.hh>
 #include <FileEditor.hh>
+#include <string.h>
 
 void AESTests(), FileTest();
 
@@ -12,14 +13,20 @@ void FileTest(){
   uint8_t buf[131940];
   const char file[] = "/home/itay/Desktop/hi.txt";
   char text[] = "GET WIPED SON!";
+
   FileEditor fedit;
   if(fedit.loadFile(file)){
-    fedit.writeBytes((uint8_t*)text,14);
-    uint32_t readNum = fedit.readBytes(buf,fedit.fileSize()); 
-    for(uint32_t i = 0; i<readNum; i++){
+    int32_t readNum = fedit.readBytes(buf,fedit.fileSize()); 
+    for(int32_t i = 0; i<readNum; i++){
       std::cout<<char(buf[i]);
     } 
     fedit.writeBytes((uint8_t*)text,14);
+    fedit.writeBytes((uint8_t*)text,14);
+    fedit.loadFile(file);
+    readNum = fedit.readBytes(buf,fedit.fileSize()); 
+    for(int32_t i = 0; i<readNum; i++){
+      std::cout<<char(buf[i]);
+    } 
   }
 
 }
