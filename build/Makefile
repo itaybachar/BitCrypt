@@ -234,6 +234,19 @@ Crypt/fast:
 	$(MAKE) $(MAKESILENT) -f src/Crypt/CMakeFiles/Crypt.dir/build.make src/Crypt/CMakeFiles/Crypt.dir/build
 .PHONY : Crypt/fast
 
+#=============================================================================
+# Target rules for targets named App
+
+# Build rule for target.
+App: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 App
+.PHONY : App
+
+# fast build rule for target.
+App/fast:
+	$(MAKE) $(MAKESILENT) -f src/app/CMakeFiles/App.dir/build.make src/app/CMakeFiles/App.dir/build
+.PHONY : App/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -245,6 +258,7 @@ help:
 	@echo "... debug"
 	@echo "... release"
 	@echo "... AES"
+	@echo "... App"
 	@echo "... Argon"
 	@echo "... BitCrypt"
 	@echo "... Blake2"
