@@ -41,5 +41,6 @@ public:
   int8_t checkFile(const char* filepath, const char* key, uint32_t keyLen);
   bool encryptFile(const char* filepath, const char* key, uint32_t keyLen);
   bool decryptFile(const char* filepath, const char* key, uint32_t keyLen);
+  void setEncryptionType(uint8_t encType);
 
 };

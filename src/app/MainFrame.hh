@@ -17,10 +17,15 @@ private:
   wxButton* decFileButton;
   wxDirDialog* dirDialog;
   wxTreeItemId root;
-  BitCrypt* crypt;
-  uint8_t m_keyLen;
   wxString m_currentFilePath;
+  wxMenuBar* menu;
+  wxMenu* file;
+  wxMenu* options;
 
+private:
+  bool hidingPass;
+  uint8_t m_keyLen;
+  BitCrypt* crypt;
 
   DECLARE_EVENT_TABLE();
 public:
@@ -34,6 +39,8 @@ public:
   void checkPass(wxCommandEvent& event);
   void encryptEvent(wxCommandEvent& event);
   void decryptEvent(wxCommandEvent& event);
+  void menuBar(wxCommandEvent& event);
+  void passChange(wxCommandEvent& event);
 private:
   void _doLayout();
 };

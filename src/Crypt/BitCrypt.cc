@@ -47,9 +47,9 @@ bool BitCrypt::encryptFile(const char* filepath,const char* key, uint32_t keyLen
   uint8_t* expandedInput = new uint8_t[expandedSize];
   //Set Hash
   memcpy(&expandedInput[0],hash,this->_hashLen);
-  //If 192, set the next 16 bytes to 0x0
+  //If 192, set the next 8 bytes to 0x0
   if(this->_keyLen == AES_192)
-    memset(&expandedInput[16],0x0,16);
+    memset(&expandedInput[24],0x0,8);
 
   //Copy rest of file into the new input
   memcpy(&expandedInput[this->_headerSize],this->_f->getBuffer(),this->_f->fileSize());
@@ -120,7 +120,9 @@ bool BitCrypt::_compareHash(uint8_t* h1, uint8_t* h2, uint32_t size){
 }
 
 
+//CheckFile must be called before
 bool BitCrypt::decryptFile(const char* filepath, const char* key, uint32_t keyLen){
+  //Load File into memory
   uint8_t* hashedKey = _hashKey(key,keyLen);
 
   uint32_t bytesToRead = this->_f->fileSize() - this->_f->filePointerLoc(); 
@@ -146,4 +148,12 @@ void BitCrypt::_cleanDecryption(uint8_t* in, uint32_t* size){
     else if(in[i] == in[i+1] && in[i] == 0x0)
       count++;
   *size = *size-count;
+}
+
+void BitCrypt::setEncryptionType(uint8_t encType){
+  if(encType == AES_128 || encType == AES_192 || encType == AES_256){
+    //Update Key Length variables
+    this->_keyLen = encType;
+    _updateKeyLen();
+  }
 }

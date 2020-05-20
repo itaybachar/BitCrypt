@@ -1,12 +1,28 @@
 #include "MainFrame.hh"
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wxPoint(30,30), wxSize(600,450)),
-  m_keyLen(AES_128)
+  m_keyLen(AES_128),
+  hidingPass(false)
 {
   wxColour c;
   c.Set("#ffe680");
   //c.Set("#00b3b3");
   SetBackgroundColour(c);
+
+  //MenuBar
+  menu = new wxMenuBar;
+  file = new wxMenu;
+  options = new wxMenu;
+  file->AppendSubMenu(options,"AES Options");
+  file->AppendSeparator();
+  file->Append(wxID_EXIT, "Quit");
+  
+  options->AppendRadioItem(0,"AES_128");
+  options->AppendRadioItem(1,"AES_192");
+  options->AppendRadioItem(2,"AES_256");
+
+  menu->Append(file,"File");
+  SetMenuBar(menu);
 
   //Initialize Componenets
   browseButton = new wxButton(this, 10001,"Browse Folder");
@@ -25,7 +41,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wx
   crypt = new BitCrypt(m_keyLen);
   _doLayout();
 
-  SetMinSize(wxSize(600,450));
+  SetMinSize(wxSize(600,475));
   //Positions frame in the center of the screen
   Centre();
 
@@ -135,16 +151,18 @@ void MainFrame::loadFile(wxTreeEvent& event){
 
 //CheckBox Action
 void MainFrame::hidePass(wxCommandEvent& event){
+  hidingPass = true;
   wxSizer* szr = passwordBox->GetContainingSizer();
   wxString pass = passwordBox->GetValue();
   uint16_t s = (hideCtrl->IsChecked()?0:wxTE_PASSWORD);
   szr->Detach(passwordBox);
   delete passwordBox;
-  passwordBox = new wxTextCtrl(this,1,pass,wxDefaultPosition,wxDefaultSize,s);
+  passwordBox = new wxTextCtrl(this,10003,pass,wxDefaultPosition,wxDefaultSize,s);
   szr->Add(passwordBox, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT, 0);
   szr->Layout();
 
   event.Skip();
+  hidingPass = false;
 }
 
 void MainFrame::checkPass(wxCommandEvent& event){
@@ -193,14 +211,39 @@ void MainFrame::decryptEvent(wxCommandEvent& event){
   event.Skip();
 }
 
+void MainFrame::menuBar(wxCommandEvent& event){
+  uint32_t id = event.GetId();
+  if(id == wxID_EXIT)
+    Close(true);
+  
+  if(id == 0){
+    m_keyLen = AES_128;
+  }else if(id == 1){
+    m_keyLen = AES_192;
+  }else if(id == 2){
+    m_keyLen = AES_256;
+  }
+  crypt->setEncryptionType(m_keyLen);
+}
+
+void MainFrame::passChange(wxCommandEvent& event){
+  if(!hidingPass && decFileButton->IsEnabled())
+    decFileButton->Disable();
+}
+
 
 BEGIN_EVENT_TABLE(MainFrame,wxFrame)
   //Function Binding
   EVT_BUTTON(10001,MainFrame::chooseDir)
   EVT_TREE_ITEM_ACTIVATED(10002,MainFrame::loadFile)
+  EVT_TEXT(10003,MainFrame::passChange)
   EVT_CHECKBOX(10004,MainFrame::hidePass)
   EVT_BUTTON(10005,MainFrame::checkPass)
   EVT_BUTTON(10006,MainFrame::encryptEvent)
   EVT_BUTTON(10007,MainFrame::decryptEvent)
+  EVT_MENU(wxID_EXIT,MainFrame::menuBar)
+  EVT_MENU(0,MainFrame::menuBar)
+  EVT_MENU(1,MainFrame::menuBar)
+  EVT_MENU(2,MainFrame::menuBar)
 END_EVENT_TABLE()
 
