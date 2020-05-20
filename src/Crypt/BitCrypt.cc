@@ -79,7 +79,7 @@ uint8_t* BitCrypt::_hashKey(const char* key, uint32_t keyLen){
 //  -1: no header found
 //   0: Header Found, passwords do not match
 //   1: Header Found, passwords match
-int8_t BitCrypt::checkFile(const char* filepath, const char* key, uint32_t keyLen, uint8_t* outType){
+int8_t BitCrypt::checkFile(const char* filepath, const char* key, uint32_t keyLen){
   //Load File into memory
   this->_f->loadFile(filepath);
 
@@ -89,7 +89,6 @@ int8_t BitCrypt::checkFile(const char* filepath, const char* key, uint32_t keyLe
 
   //Check if file size exists
   if(encType == AES_128 || encType == AES_192 || encType == AES_256){
-    *outType = encType;
     //Update Key Length variables
     this->_keyLen = encType;
     _updateKeyLen();
@@ -122,23 +121,21 @@ bool BitCrypt::_compareHash(uint8_t* h1, uint8_t* h2, uint32_t size){
 
 
 bool BitCrypt::decryptFile(const char* filepath, const char* key, uint32_t keyLen){
-  if(checkFile(filepath,key,keyLen,nullptr)){
-    uint8_t* hashedKey = _hashKey(key,keyLen);
+  uint8_t* hashedKey = _hashKey(key,keyLen);
 
-    uint32_t bytesToRead = this->_f->fileSize() - this->_f->filePointerLoc(); 
-    uint8_t encryptedIn[bytesToRead];
-    this->_f->readBytes(encryptedIn,bytesToRead);
+  uint32_t bytesToRead = this->_f->fileSize() - this->_f->filePointerLoc(); 
+  uint8_t encryptedIn[bytesToRead];
+  this->_f->readBytes(encryptedIn,bytesToRead);
 
-    //Decrypt Input
-    uint32_t outLen = 0;
-    uint8_t* decryptedIn = this->_aes->decrypt(encryptedIn,bytesToRead,hashedKey, this->_hashLen,&outLen);
-    _cleanDecryption(decryptedIn, &outLen);
+  //Decrypt Input
+  uint32_t outLen = 0;
+  uint8_t* decryptedIn = this->_aes->decrypt(encryptedIn,bytesToRead,hashedKey, this->_hashLen,&outLen);
+  _cleanDecryption(decryptedIn, &outLen);
 
-    //Write to file
-    this->_f->writeBytes(decryptedIn,outLen);
+  //Write to file
+  this->_f->writeBytes(decryptedIn,outLen);
 
-    return true;
-  }else return false;
+  return true;
 }
 
 void BitCrypt::_cleanDecryption(uint8_t* in, uint32_t* size){

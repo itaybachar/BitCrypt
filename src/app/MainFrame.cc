@@ -148,12 +148,11 @@ void MainFrame::hidePass(wxCommandEvent& event){
 }
 
 void MainFrame::checkPass(wxCommandEvent& event){
-  int8_t out = crypt->checkFile(m_currentFilePath,passwordBox->GetValue(),passwordBox->GetValue().Len(),&m_keyLen);
+  int8_t out = crypt->checkFile(m_currentFilePath,passwordBox->GetValue(),passwordBox->GetValue().Len());
 
   wxMessageDialog dialog(this,wxEmptyString);
   switch(out){
     case -1:
-
       dialog.SetMessage("File not Encrypted:\nEncryption Enabled");
       dialog.ShowModal();
       encFileButton->Enable();
@@ -174,11 +173,23 @@ void MainFrame::checkPass(wxCommandEvent& event){
   event.Skip();
 }
 void MainFrame::encryptEvent(wxCommandEvent& event){
-  std::cout<<"enc";
+  wxString pass = passwordBox->GetValue();
+  crypt->encryptFile(m_currentFilePath,pass,pass.Len());
+
+  wxMessageDialog dialog(this,"Encryption Successful!");
+  dialog.ShowModal();
+
+  encFileButton->Disable();
   event.Skip();
 }
 void MainFrame::decryptEvent(wxCommandEvent& event){
-  std::cout<<"dec";
+  wxString pass = passwordBox->GetValue();
+  crypt->decryptFile(m_currentFilePath,pass,pass.Len());
+
+  wxMessageDialog dialog(this,"Decryption Successful!");
+  dialog.ShowModal();
+
+  decFileButton->Disable();
   event.Skip();
 }
 

@@ -38,7 +38,7 @@ private:
 public:
   BitCrypt(uint8_t _keyLen = AES_128);
 
-  int8_t checkFile(const char* filepath, const char* key, uint32_t keyLen,uint8_t* outType);
+  int8_t checkFile(const char* filepath, const char* key, uint32_t keyLen);
   bool encryptFile(const char* filepath, const char* key, uint32_t keyLen);
   bool decryptFile(const char* filepath, const char* key, uint32_t keyLen);
 
