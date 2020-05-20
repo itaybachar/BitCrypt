@@ -1,22 +1,28 @@
 #include "MainFrame.hh"
 
-MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wxPoint(30,30), wxSize(600,450)){
+MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wxPoint(30,30), wxSize(600,450)),
+  m_keyLen(AES_128)
+{
   wxColour c;
   c.Set("#ffe680");
+  //c.Set("#00b3b3");
   SetBackgroundColour(c);
 
   //Initialize Componenets
   browseButton = new wxButton(this, 10001,"Browse Folder");
   fileTree = new wxTreeCtrl(this, 10002);
   root = fileTree->AddRoot("Please Select A Folder");
-  passwordBox = new wxTextCtrl(this, 10003,"",wxDefaultPosition,wxDefaultSize,wxTE_PASSWORD);
-  passwordBox->SetHint("Password");
+  passwordBox = new wxTextCtrl(this, 10003,wxEmptyString,wxDefaultPosition,wxDefaultSize,wxTE_PASSWORD);
   hideCtrl = new wxCheckBox(this, 10004, "Show Password");
   checkFileButton = new wxButton(this, 10005, "Check Password");
   encFileButton = new wxButton(this, 10006, "Encrypt File");
   decFileButton = new wxButton(this, 10007, "Decrypt File");
   dirDialog = new wxDirDialog(this, "Select Directory", wxEmptyString, wxDD_DEFAULT_STYLE, wxDefaultPosition, wxDefaultSize, "wxDirDialog");
 
+  checkFileButton->Disable();
+  encFileButton->Disable();
+  decFileButton->Disable();
+  crypt = new BitCrypt(m_keyLen);
   _doLayout();
 
   SetMinSize(wxSize(600,450));
@@ -42,12 +48,16 @@ void MainFrame::_doLayout(){
 
   //Current File Display
   wxStaticText* t1 = new wxStaticText(this,wxID_ANY, "Selected File");
-  fileLocation = new wxStaticText(this,wxID_ANY, "Select A File");
+  fileLocation = new wxStaticText(this,wxID_ANY, "Choose A File");
   rightSizer->Add(t1, 0, wxALIGN_CENTER | wxTOP, 45);
   rightSizer->Add(fileLocation, 1, wxALIGN_CENTER | wxTOP, 10); //Password Area
   wxStaticText* t3 = new wxStaticText(this,wxID_ANY,"Password");
   rightSizer->Add(t3, 0, wxALIGN_CENTER | wxTOP, 10);
-  rightSizer->Add(passwordBox, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT, 20);
+
+  wxBoxSizer* passwordHolder = new wxBoxSizer(wxHORIZONTAL);
+  passwordHolder->Add(passwordBox,0,wxALIGN_CENTER | wxLEFT | wxRIGHT,0);
+  rightSizer->Add(passwordHolder, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT, 20);
+
   rightSizer->Add(hideCtrl, 0, wxALIGN_CENTER | wxBOTTOM, 65);
 
   //Action Buttons
@@ -65,6 +75,7 @@ void MainFrame::_doLayout(){
 
 //Choose Folder Action
 void MainFrame::chooseDir(wxCommandEvent& event){
+
   //Check that Item Selected is not already selected
   wxDir dir;
   dirDialog->SetPath("");
@@ -79,13 +90,7 @@ void MainFrame::chooseDir(wxCommandEvent& event){
   wxString filename;
   bool cont = false;
   /*
-  //Add SubFolders
-  if(open)
-  cont = dir.GetFirst(&filename,wxEmptyString,wxDIR_DIRS);
-  while(cont && open){
-  fileTree->AppendItem(root,filename,0);
-  cont = dir.GetNext(&filename);
-  }
+     cont = dir.GetFirst(&filename,wxEmptyString,wxDIR_DIRS);
    */
 
   if(open){
@@ -103,33 +108,69 @@ void MainFrame::chooseDir(wxCommandEvent& event){
 //Tree Selection (double click)
 void MainFrame::loadFile(wxTreeEvent& event){
   wxTreeItemId id = event.GetItem();
-  wxString path = fileTree->GetItemText(id);
+  if(!fileTree->ItemHasChildren(id) && id != root){
+    wxString path = fileTree->GetItemText(id);
 
-  if(!path.Cmp(fileLocation->GetLabel()) || path.Cmp("Please Select A Folder")){
+    int i =path.Cmp(fileLocation->GetLabel());
+    if(path.Cmp(fileLocation->GetLabel())){
 
+      encFileButton->Disable();
+      decFileButton->Disable();
+      if(id != root){
+        wxTreeItemId par = fileTree->GetItemParent(id);
+        do{
+          path = fileTree->GetItemText(par) + "/" + path;
+          par = fileTree->GetItemParent(id);
+        }while(par != root);
+      }
 
-    if(id != root){
-      wxTreeItemId par = fileTree->GetItemParent(id);
-      do{
-        path = fileTree->GetItemText(par) + "/" + path;
-        par = fileTree->GetItemParent(id);
-      }while(par != root);
+      m_currentFilePath = path;
+      fileLocation->SetLabel(fileTree->GetItemText(id));
+      Refresh();
     }
-
-    fileLocation->SetLabel(fileTree->GetItemText(id));
-    Refresh();
+    checkFileButton->Enable();
   }
   event.Skip();
 }
 
 //CheckBox Action
 void MainFrame::hidePass(wxCommandEvent& event){
-  std::cout<<"hide";
+  wxSizer* szr = passwordBox->GetContainingSizer();
+  wxString pass = passwordBox->GetValue();
+  uint16_t s = (hideCtrl->IsChecked()?0:wxTE_PASSWORD);
+  szr->Detach(passwordBox);
+  delete passwordBox;
+  passwordBox = new wxTextCtrl(this,1,pass,wxDefaultPosition,wxDefaultSize,s);
+  szr->Add(passwordBox, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT, 0);
+  szr->Layout();
+
   event.Skip();
 }
 
 void MainFrame::checkPass(wxCommandEvent& event){
-  std::cout<<"check";
+  int8_t out = crypt->checkFile(m_currentFilePath,passwordBox->GetValue(),passwordBox->GetValue().Len(),&m_keyLen);
+
+  wxMessageDialog dialog(this,wxEmptyString);
+  switch(out){
+    case -1:
+
+      dialog.SetMessage("File not Encrypted:\nEncryption Enabled");
+      dialog.ShowModal();
+      encFileButton->Enable();
+      break;
+    case 0:
+      dialog.SetMessage("File Encrypted:\n Wrong Password");
+      dialog.ShowModal();
+      break;
+    case 1:
+      dialog.SetMessage("File Encrypted:\n Decryption Enabled");
+      dialog.ShowModal();
+      decFileButton->Enable();
+      break;
+    default:
+      break;
+  }
+
   event.Skip();
 }
 void MainFrame::encryptEvent(wxCommandEvent& event){
@@ -142,10 +183,10 @@ void MainFrame::decryptEvent(wxCommandEvent& event){
 }
 
 
-  BEGIN_EVENT_TABLE(MainFrame,wxFrame)
+BEGIN_EVENT_TABLE(MainFrame,wxFrame)
+  //Function Binding
   EVT_BUTTON(10001,MainFrame::chooseDir)
-EVT_TREE_ITEM_ACTIVATED(10002,MainFrame::loadFile)
-  //EVT_TEXT_ENTER(10003, MainFrame::validate
+  EVT_TREE_ITEM_ACTIVATED(10002,MainFrame::loadFile)
   EVT_CHECKBOX(10004,MainFrame::hidePass)
   EVT_BUTTON(10005,MainFrame::checkPass)
   EVT_BUTTON(10006,MainFrame::encryptEvent)

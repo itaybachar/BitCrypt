@@ -1,8 +1,9 @@
 #pragma once
 
-#include "wx/wx.h"
-#include "wx/treectrl.h"
-#include "wx/dir.h"
+#include <wx/wx.h>
+#include <wx/treectrl.h>
+#include <wx/dir.h>
+#include "BitCrypt.hh"
 
 class MainFrame : public wxFrame{
 private:
@@ -16,6 +17,10 @@ private:
   wxButton* decFileButton;
   wxDirDialog* dirDialog;
   wxTreeItemId root;
+  BitCrypt* crypt;
+  uint8_t m_keyLen;
+  wxString m_currentFilePath;
+
 
   DECLARE_EVENT_TABLE();
 public:

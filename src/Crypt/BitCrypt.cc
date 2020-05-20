@@ -75,17 +75,21 @@ uint8_t* BitCrypt::_hashKey(const char* key, uint32_t keyLen){
 }
 
 //Checks if a file is encrypted, and if the key is correct
-bool BitCrypt::checkFile(const char* filepath, const char* key, uint32_t keyLen){
+//Return
+//  -1: no header found
+//   0: Header Found, passwords do not match
+//   1: Header Found, passwords match
+int8_t BitCrypt::checkFile(const char* filepath, const char* key, uint32_t keyLen, uint8_t* outType){
   //Load File into memory
   this->_f->loadFile(filepath);
 
   //Read first Byte
   uint8_t encType = 0;
   this->_f->readBytes(&encType,1);
-  uint8_t mask = AES_128 | AES_192 | AES_256;
 
   //Check if file size exists
-  if(encType & mask){
+  if(encType == AES_128 || encType == AES_192 || encType == AES_256){
+    *outType = encType;
     //Update Key Length variables
     this->_keyLen = encType;
     _updateKeyLen();
@@ -104,7 +108,7 @@ bool BitCrypt::checkFile(const char* filepath, const char* key, uint32_t keyLen)
 
     return _compareHash(hashedKey,decryptedHash,this->_hashLen);
 
-  }else return false;
+  }else return -1;
 }
 
 bool BitCrypt::_compareHash(uint8_t* h1, uint8_t* h2, uint32_t size){
@@ -118,7 +122,7 @@ bool BitCrypt::_compareHash(uint8_t* h1, uint8_t* h2, uint32_t size){
 
 
 bool BitCrypt::decryptFile(const char* filepath, const char* key, uint32_t keyLen){
-  if(checkFile(filepath,key,keyLen)){
+  if(checkFile(filepath,key,keyLen,nullptr)){
     uint8_t* hashedKey = _hashKey(key,keyLen);
 
     uint32_t bytesToRead = this->_f->fileSize() - this->_f->filePointerLoc(); 
