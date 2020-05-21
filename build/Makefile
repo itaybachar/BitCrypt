@@ -131,32 +131,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named debug
-
-# Build rule for target.
-debug: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 debug
-.PHONY : debug
-
-# fast build rule for target.
-debug/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/debug.dir/build.make CMakeFiles/debug.dir/build
-.PHONY : debug/fast
-
-#=============================================================================
-# Target rules for targets named release
-
-# Build rule for target.
-release: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 release
-.PHONY : release
-
-# fast build rule for target.
-release/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/release.dir/build.make CMakeFiles/release.dir/build
-.PHONY : release/fast
-
-#=============================================================================
 # Target rules for targets named BitCrypt
 
 # Build rule for target.
@@ -166,8 +140,21 @@ BitCrypt: cmake_check_build_system
 
 # fast build rule for target.
 BitCrypt/fast:
-	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/BitCrypt.dir/build.make src/CMakeFiles/BitCrypt.dir/build
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/BitCrypt.dir/build.make CMakeFiles/BitCrypt.dir/build
 .PHONY : BitCrypt/fast
+
+#=============================================================================
+# Target rules for targets named wxLIB
+
+# Build rule for target.
+wxLIB: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 wxLIB
+.PHONY : wxLIB
+
+# fast build rule for target.
+wxLIB/fast:
+	$(MAKE) $(MAKESILENT) -f libs/wxWidgets/Linux/lib/CMakeFiles/wxLIB.dir/build.make libs/wxWidgets/Linux/lib/CMakeFiles/wxLIB.dir/build
+.PHONY : wxLIB/fast
 
 #=============================================================================
 # Target rules for targets named Argon
@@ -247,6 +234,33 @@ App/fast:
 	$(MAKE) $(MAKESILENT) -f src/app/CMakeFiles/App.dir/build.make src/app/CMakeFiles/App.dir/build
 .PHONY : App/fast
 
+src/app/App.o: src/app/App.cc.o
+
+.PHONY : src/app/App.o
+
+# target to build an object file
+src/app/App.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/BitCrypt.dir/build.make CMakeFiles/BitCrypt.dir/src/app/App.cc.o
+.PHONY : src/app/App.cc.o
+
+src/app/App.i: src/app/App.cc.i
+
+.PHONY : src/app/App.i
+
+# target to preprocess a source file
+src/app/App.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/BitCrypt.dir/build.make CMakeFiles/BitCrypt.dir/src/app/App.cc.i
+.PHONY : src/app/App.cc.i
+
+src/app/App.s: src/app/App.cc.s
+
+.PHONY : src/app/App.s
+
+# target to generate assembly for a file
+src/app/App.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/BitCrypt.dir/build.make CMakeFiles/BitCrypt.dir/src/app/App.cc.s
+.PHONY : src/app/App.cc.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -255,8 +269,6 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... debug"
-	@echo "... release"
 	@echo "... AES"
 	@echo "... App"
 	@echo "... Argon"
@@ -264,6 +276,10 @@ help:
 	@echo "... Blake2"
 	@echo "... Crypt"
 	@echo "... Util"
+	@echo "... wxLIB"
+	@echo "... src/app/App.o"
+	@echo "... src/app/App.i"
+	@echo "... src/app/App.s"
 .PHONY : help
 
 
