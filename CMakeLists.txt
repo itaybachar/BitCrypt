@@ -20,6 +20,6 @@ add_subdirectory(src)
 add_executable(BitCrypt src/app/App.cc)
 
 #Link executable
-target_link_libraries(BitCrypt ${wxLIB})
 target_link_libraries(BitCrypt App)
+target_link_libraries(BitCrypt ${wxWidgets_LIBRARIES})
 target_link_libraries(BitCrypt -static-libgcc -static-libstdc++)

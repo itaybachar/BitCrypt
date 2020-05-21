@@ -144,19 +144,6 @@ BitCrypt/fast:
 .PHONY : BitCrypt/fast
 
 #=============================================================================
-# Target rules for targets named wxLIB
-
-# Build rule for target.
-wxLIB: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 wxLIB
-.PHONY : wxLIB
-
-# fast build rule for target.
-wxLIB/fast:
-	$(MAKE) $(MAKESILENT) -f libs/wxWidgets/Linux/lib/CMakeFiles/wxLIB.dir/build.make libs/wxWidgets/Linux/lib/CMakeFiles/wxLIB.dir/build
-.PHONY : wxLIB/fast
-
-#=============================================================================
 # Target rules for targets named Argon
 
 # Build rule for target.
@@ -276,7 +263,6 @@ help:
 	@echo "... Blake2"
 	@echo "... Crypt"
 	@echo "... Util"
-	@echo "... wxLIB"
 	@echo "... src/app/App.o"
 	@echo "... src/app/App.i"
 	@echo "... src/app/App.s"
