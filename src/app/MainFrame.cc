@@ -1,6 +1,6 @@
 #include "MainFrame.hh"
 
-MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wxPoint(30,30), wxSize(600,450)),
+MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wxDefaultPosition, wxDefaultSize),
   m_keyLen(AES_128),
   hidingPass(false)
 {

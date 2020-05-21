@@ -1,5 +1,5 @@
 #Find wxWidgets
-find_package(wxWidgets REQUIRED COMPONENTS net core base)
+find_package(wxWidgets 3.1 REQUIRED COMPONENTS core base)
 include(${wxWidgets_USE_FILE})
 
 #Add Subdirectories
@@ -22,3 +22,4 @@ add_executable(BitCrypt app/App.cc)
 #Link executable
 target_link_libraries(BitCrypt App)
 target_link_libraries(BitCrypt ${wxWidgets_LIBRARIES})
+target_link_libraries(BitCrypt -static-libgcc -static-libstdc++)
