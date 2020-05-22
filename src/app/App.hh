@@ -1,6 +1,6 @@
 #pragma once
 
-//#include "wx/wx.h"
+#include "wx/wx.h"
 #include "MainFrame.hh"
 
 
@@ -9,7 +9,7 @@ public:
   App();
   ~App();
 
-  virtual bool OnInit();
+  virtual bool OnInit() wxOVERRIDE;
 
 private:
   MainFrame* _main = nullptr;

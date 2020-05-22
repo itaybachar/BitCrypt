@@ -1,5 +1,4 @@
 #include "App.hh"
-#include <iostream>
 
 IMPLEMENT_APP(App); //Creates main function
 

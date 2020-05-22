@@ -1,5 +1,5 @@
 #Find Sources
-file(GLOB SRCS ./**.cpp ./**.c ./blake2/**.cpp ./blake2/**.c)
+file(GLOB SRCS ./**.cpp ./**.c)
 
 #Library
 add_library(Argon ${SRCS})

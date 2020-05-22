@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 3.15)
 project(BitCrypt)
 
 #Find wxWidgets
-find_package(wxWidgets 3.1 REQUIRED COMPONENTS core base)
+find_package(wxWidgets 3.1 COMPONENTS core base REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 #Set Default Compiler
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msha -msse4.1 -mssse3 -Wpsabi -pthread ${CMAKE_CXX_FLAGS_DEBUG}")
-#Needed to compile argon
-#set(CMAKE_C_FLAGS "-m32")
+set(CMAKE_CXX_STANDARD 11)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msha -pthread ${CMAKE_CXX_FLAGS_RELEASE}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msha -pthread ${CMAKE_CXX_FLAGS_RELEASE}")
 
 #Out Directory Logic
 if(WIN32)
@@ -27,10 +27,10 @@ endif()
 add_subdirectory(src)
 
 #Create exe
-#add_executable(BitCrypt main.cpp)
+#add_executable(BitCrypt src/main.cpp)
 add_executable(BitCrypt src/app/App.cc)
 
 #Link executable
 target_link_libraries(BitCrypt App)
 target_link_libraries(BitCrypt ${wxWidgets_LIBRARIES})
-target_link_libraries(BitCrypt -static-libgcc -static-libstdc++)
+target_link_libraries(BitCrypt -static-libgcc -static-libstdc++ -luxtheme)
