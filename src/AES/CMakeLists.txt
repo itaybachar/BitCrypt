@@ -1,5 +1,5 @@
 #Find Sources
-file(GLOB SRCS ./**.cpp ./**.c)
+file(GLOB SRCS ./**.cc ./**.c)
 
 #Library
 add_library(AES ${SRCS})
