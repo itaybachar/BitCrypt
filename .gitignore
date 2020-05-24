@@ -12,5 +12,5 @@ _deps
 
 #Build Folder
 build/*
-!build/Makefile
+build/Makefile
 !build/.gitkeep
