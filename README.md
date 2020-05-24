@@ -4,8 +4,6 @@ Bit Crypt is an open source, cross-platform file encryption software. Using Argo
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
 ### Prerequisites
 
 To compile this code, use g++ or MinGW if on Windows
