@@ -1,9 +1,13 @@
 #include "MainFrame.hh"
+#include "icon.xpm"
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wxDefaultPosition, wxDefaultSize),
   m_keyLen(AES_128),
   hidingPass(false)
 {
+  //Icon
+  SetIcon(lock_icon);
+
   wxColour c;
   c.Set("#ffe680");
   //c.Set("#00b3b3");
@@ -13,15 +17,20 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wx
   menu = new wxMenuBar;
   file = new wxMenu;
   options = new wxMenu;
+  help = new wxMenu;
+
   file->AppendSubMenu(options,"AES Options");
   file->AppendSeparator();
   file->Append(wxID_EXIT, "Quit");
+  
+  help->Append(wxID_HELP, "Help");
   
   options->AppendRadioItem(0,"AES_128");
   options->AppendRadioItem(1,"AES_192");
   options->AppendRadioItem(2,"AES_256");
 
   menu->Append(file,"File");
+  menu->Append(help,"Help");
   SetMenuBar(menu);
 
   //Initialize Componenets
@@ -30,7 +39,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wx
   root = fileTree->AddRoot("Please Select A Folder");
   passwordBox = new wxTextCtrl(this, 10003,wxEmptyString,wxDefaultPosition,wxDefaultSize,wxTE_PASSWORD);
   hideCtrl = new wxCheckBox(this, 10004, "Show Password");
-  checkFileButton = new wxButton(this, 10005, "Check Password");
+  checkFileButton = new wxButton(this, 10005, "Check File");
   encFileButton = new wxButton(this, 10006, "Encrypt File");
   decFileButton = new wxButton(this, 10007, "Decrypt File");
   dirDialog = new wxDirDialog(this, "Select Directory", wxEmptyString, wxDD_DEFAULT_STYLE, wxDefaultPosition, wxDefaultSize, "wxDirDialog");
@@ -143,6 +152,7 @@ void MainFrame::loadFile(wxTreeEvent& event){
       m_currentFilePath = path;
       fileLocation->SetLabel(fileTree->GetItemText(id));
       Refresh();
+      Layout();
     }
     checkFileButton->Enable();
   }
@@ -226,6 +236,12 @@ void MainFrame::menuBar(wxCommandEvent& event){
   crypt->setEncryptionType(m_keyLen);
 }
 
+void MainFrame::helpBox(wxCommandEvent& event){
+  wxMessageBox("1) Choose a File\n2)Check the File(with or without a password)\n3)Proper Actions will be unlocked",
+                "BitCrypt Help", wxOK | wxICON_INFORMATION);
+
+}
+
 void MainFrame::passChange(wxCommandEvent& event){
   if(!hidingPass && decFileButton->IsEnabled())
     decFileButton->Disable();
@@ -245,5 +261,6 @@ BEGIN_EVENT_TABLE(MainFrame,wxFrame)
   EVT_MENU(0,MainFrame::menuBar)
   EVT_MENU(1,MainFrame::menuBar)
   EVT_MENU(2,MainFrame::menuBar)
+  EVT_MENU(wxID_HELP, MainFrame::helpBox)
 END_EVENT_TABLE()
 

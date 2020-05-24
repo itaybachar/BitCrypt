@@ -14,7 +14,6 @@ private:
   const char* filepath;
   bool truncate; //Delete contents on first write
 private:
-  bool _closeFile();
 public:
   FileEditor();
   ~FileEditor();
@@ -23,6 +22,7 @@ public:
   bool loadFile(const char filepath[], bool truncate = true);
   int32_t readBytes(uint8_t* buf, uint32_t numBytes);
   int32_t writeBytes(uint8_t* buf, uint32_t numBytes);
+  bool closeFile();
 
   //Helper
   bool wipeFile();

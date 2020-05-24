@@ -63,6 +63,7 @@ bool BitCrypt::encryptFile(const char* filepath,const char* key, uint32_t keyLen
 
   //Write Encrypted Hash and file
   this->_f->writeBytes(encryptedInput,outLen);
+  this->_f->closeFile();
 
   return true;
 }
@@ -136,6 +137,7 @@ bool BitCrypt::decryptFile(const char* filepath, const char* key, uint32_t keyLe
 
   //Write to file
   this->_f->writeBytes(decryptedIn,outLen);
+  this-_f->closeFile();
 
   return true;
 }

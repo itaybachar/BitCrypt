@@ -20,6 +20,7 @@ private:
   wxString m_currentFilePath;
   wxMenuBar* menu;
   wxMenu* file;
+  wxMenu* help;
   wxMenu* options;
 
 private:
@@ -40,6 +41,7 @@ public:
   void encryptEvent(wxCommandEvent& event);
   void decryptEvent(wxCommandEvent& event);
   void menuBar(wxCommandEvent& event);
+  void helpBox(wxCommandEvent& event);
   void passChange(wxCommandEvent& event);
 private:
   void _doLayout();

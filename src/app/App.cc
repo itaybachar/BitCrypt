@@ -1,5 +1,6 @@
 #include "App.hh"
 
+
 IMPLEMENT_APP(App); //Creates main function
 
 App::App() {

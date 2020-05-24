@@ -11,6 +11,11 @@
 //Memcpy
 #include <cstring>
 
+//Check for O_BINARY, needed for Windows writing
+#ifndef O_BINARY
+  #define O_BINARY 0
+#endif
+
 FileEditor::FileEditor():
   fd(-1),
   size(0),
@@ -20,7 +25,7 @@ FileEditor::FileEditor():
 {}
 
 FileEditor::~FileEditor(){
-  _closeFile();
+  closeFile();
 
   delete[] buf;
 }
@@ -28,7 +33,7 @@ FileEditor::~FileEditor(){
 //Loads a file and sets class variables
 bool FileEditor::loadFile(const char filepath[], bool truncate){
   //Close Old file if was open
-  _closeFile();
+  closeFile();
 
   this->flags = O_RDONLY;
   this->truncate = truncate;
@@ -75,7 +80,7 @@ uint32_t FileEditor::fileSize(){
 }
 
 //Closes current file
-bool FileEditor::_closeFile(){
+bool FileEditor::closeFile(){
   return close(this->fd);
 }
 
@@ -84,8 +89,8 @@ int32_t FileEditor::writeBytes(uint8_t* buf, uint32_t numBytes){
     return -1;
 
   if(this->flags == O_RDONLY){
-    _closeFile();
-    this->flags = O_WRONLY;
+    closeFile();
+    this->flags = O_WRONLY | O_BINARY;
     if(this->truncate)
       this->flags |= O_TRUNC;
     else this->flags |= O_APPEND;
