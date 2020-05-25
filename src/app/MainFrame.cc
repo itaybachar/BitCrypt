@@ -8,11 +8,6 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wx
   //Icon
   SetIcon(lock_icon);
 
-  wxColour c;
-  c.Set("#ffe680");
-  //c.Set("#00b3b3");
-  SetBackgroundColour(c);
-
   //MenuBar
   menu = new wxMenuBar;
   file = new wxMenu;
@@ -37,12 +32,43 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wx
   browseButton = new wxButton(this, 10001,"Browse Folder");
   fileTree = new wxTreeCtrl(this, 10002);
   root = fileTree->AddRoot("Please Select A Folder");
+  fileTree->SelectItem(root,false);
   passwordBox = new wxTextCtrl(this, 10003,wxEmptyString,wxDefaultPosition,wxDefaultSize,wxTE_PASSWORD);
   hideCtrl = new wxCheckBox(this, 10004, "Show Password");
   checkFileButton = new wxButton(this, 10005, "Check File");
   encFileButton = new wxButton(this, 10006, "Encrypt File");
   decFileButton = new wxButton(this, 10007, "Decrypt File");
   dirDialog = new wxDirDialog(this, "Select Directory", wxEmptyString, wxDD_DEFAULT_STYLE, wxDefaultPosition, wxDefaultSize, "wxDirDialog");
+
+  //Color Scheme
+  wxColour mainBg, textCol,buttonsCol,menuBarCol,inputs;
+  mainBg.Set("#222831");
+  buttonsCol.Set("#30475E");
+  textCol.Set("#ECECEC");
+  menuBarCol.Set("#181c22");
+
+  //Color Set
+  SetBackgroundColour(mainBg);
+
+  menu->SetBackgroundColour(menuBarCol);
+  menu->SetForegroundColour(textCol);
+
+  browseButton->SetBackgroundColour(buttonsCol);
+  browseButton->SetForegroundColour(textCol);
+  checkFileButton->SetBackgroundColour(buttonsCol);
+  checkFileButton->SetForegroundColour(textCol);
+  encFileButton->SetBackgroundColour(buttonsCol);
+  encFileButton->SetForegroundColour(textCol);
+  decFileButton->SetBackgroundColour(buttonsCol);
+  decFileButton->SetForegroundColour(textCol);
+
+  fileTree->SetBackgroundColour(buttonsCol);
+  fileTree->SetForegroundColour(textCol);
+  
+  hideCtrl->SetForegroundColour(textCol);
+  hideCtrl->SetBackgroundColour(textCol);
+
+  passwordBox->SetBackgroundColour(textCol);
 
   checkFileButton->Disable();
   encFileButton->Disable();
@@ -61,6 +87,8 @@ MainFrame::~MainFrame(){
 }
 
 void MainFrame::_doLayout(){
+  wxColour textCol;
+  textCol.Set("#ECECEC");
   //Create Sizers
   wxBoxSizer* mainSizer = new wxBoxSizer(wxHORIZONTAL); //Contains everything
   wxBoxSizer* leftSizer = new wxBoxSizer(wxVERTICAL);
@@ -73,10 +101,13 @@ void MainFrame::_doLayout(){
 
   //Current File Display
   wxStaticText* t1 = new wxStaticText(this,wxID_ANY, "Selected File");
+  t1->SetForegroundColour(textCol);
   fileLocation = new wxStaticText(this,wxID_ANY, "Choose A File");
+  fileLocation->SetForegroundColour(textCol);
   rightSizer->Add(t1, 0, wxALIGN_CENTER | wxTOP, 45);
   rightSizer->Add(fileLocation, 1, wxALIGN_CENTER | wxTOP, 10); //Password Area
   wxStaticText* t3 = new wxStaticText(this,wxID_ANY,"Password");
+  t3->SetForegroundColour(textCol);
   rightSizer->Add(t3, 0, wxALIGN_CENTER | wxTOP, 10);
 
   wxBoxSizer* passwordHolder = new wxBoxSizer(wxHORIZONTAL);
@@ -122,6 +153,7 @@ void MainFrame::chooseDir(wxCommandEvent& event){
     cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
     while(cont){
       fileTree->AppendItem(root,filename,1);
+      fileTree->SelectItem(root,false);
       cont = dir.GetNext(&filename);
     }
   }
@@ -234,19 +266,21 @@ void MainFrame::menuBar(wxCommandEvent& event){
     m_keyLen = AES_256;
   }
   crypt->setEncryptionType(m_keyLen);
+  event.Skip();
 }
 
 void MainFrame::helpBox(wxCommandEvent& event){
   wxMessageBox("1) Choose a File\n2)Check the File(with or without a password)\n3)Proper Actions will be unlocked",
                 "BitCrypt Help", wxOK | wxICON_INFORMATION);
 
+  event.Skip();
 }
 
 void MainFrame::passChange(wxCommandEvent& event){
   if(!hidingPass && decFileButton->IsEnabled())
     decFileButton->Disable();
+  event.Skip();
 }
-
 
 BEGIN_EVENT_TABLE(MainFrame,wxFrame)
   //Function Binding

@@ -9,7 +9,7 @@ include(${wxWidgets_USE_FILE})
 set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msha -pthread ${CMAKE_CXX_FLAGS_RELEASE}")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msha -pthread ${CMAKE_CXX_FLAGS_RELEASE}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msha -pthread ${CMAKE_C_FLAGS_RELEASE}")
 
 #Out Directory Logic
 list(APPEND ADDITIONAL_LIBS)
