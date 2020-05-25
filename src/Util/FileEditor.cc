@@ -35,7 +35,7 @@ bool FileEditor::loadFile(const char filepath[], bool truncate){
   //Close Old file if was open
   closeFile();
 
-  this->flags = O_RDONLY;
+  this->flags = O_RDONLY | O_BINARY;
   this->truncate = truncate;
   this->fd = open(filepath,flags);
   this->filepath = filepath;
@@ -88,7 +88,7 @@ int32_t FileEditor::writeBytes(uint8_t* buf, uint32_t numBytes){
   if(this->fd<0)
     return -1;
 
-  if(this->flags == O_RDONLY){
+  if(this->flags == (O_RDONLY | O_BINARY)){
     closeFile();
     this->flags = O_WRONLY | O_BINARY;
     if(this->truncate)

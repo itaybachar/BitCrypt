@@ -66,7 +66,6 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wx
   fileTree->SetForegroundColour(textCol);
   
   hideCtrl->SetForegroundColour(textCol);
-  hideCtrl->SetBackgroundColour(textCol);
 
   passwordBox->SetBackgroundColour(textCol);
 

@@ -8,15 +8,14 @@ include(${wxWidgets_USE_FILE})
 #Set Default Compiler
 set(CMAKE_CXX_STANDARD 11)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msha -pthread ${CMAKE_CXX_FLAGS_RELEASE}")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msha -pthread ${CMAKE_C_FLAGS_RELEASE}")
-
 #Out Directory Logic
 list(APPEND ADDITIONAL_LIBS)
+list(APPEND ADDITIONAL_FLAGS)
 if(WIN32)
   message("Compiling on Windows")
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/msw)
   list(APPEND ADDITIONAL_LIBS "-luxtheme")
+  list(APPEND ADDITIONAL_FLAGS "-mwindows")
 elseif(APPLE)
   message("Compiling on Apple")
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/osx)
@@ -24,6 +23,10 @@ else()
   message("Compiling on Unix/Linux")
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/unx)
 endif()
+
+#Compiler Flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msha -pthread ${ADDITIONAL_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msha -pthread ${CMAKE_C_FLAGS_RELEASE}")
 
 #Link src
 add_subdirectory(src)
