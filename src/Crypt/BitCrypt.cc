@@ -44,7 +44,11 @@ bool BitCrypt::encryptFile(const char* filepath,const char* key, uint32_t keyLen
 
   //Add Header
   uint32_t expandedSize = this->_headerSize + this->_f->fileSize();
-  uint8_t* expandedInput = new uint8_t[expandedSize];
+  uint32_t totalChunks = expandedSize/this->_f->MAX_BUF_SIZE;
+  if(expandedSize%this->_f->MAX_BUF_SIZE)
+    totalChunks++;
+
+  uint8_t* expandedInput = new uint8_t[this->_f->MAX_BUF_SIZE];
   //Set Hash
   memcpy(&expandedInput[0],hash,this->_hashLen);
   //If 192, set the next 8 bytes to 0x0
@@ -60,6 +64,11 @@ bool BitCrypt::encryptFile(const char* filepath,const char* key, uint32_t keyLen
 
   //Write AES type
   this->_f->writeBytes(&this->_keyLen,1);
+
+  for(uint32_t i = 0; i<totalChunks; i++){
+
+
+  }
 
   //Write Encrypted Hash and file
   this->_f->writeBytes(encryptedInput,outLen);
