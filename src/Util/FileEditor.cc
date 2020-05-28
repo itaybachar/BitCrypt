@@ -1,5 +1,8 @@
 #include "FileEditor.hh"
 
+//String
+#include <string>
+
 //File Reading
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -13,44 +16,58 @@
 
 //Check for O_BINARY, needed for Windows writing
 #ifndef O_BINARY
-  #define O_BINARY 0
+#define O_BINARY 0
 #endif
 
 FileEditor::FileEditor():
   fd(-1),
   size(0),
   loc(0),
-  truncate(true),
-  flags(0)
-{}
+  flags(0),
+  avail(0)
+{
+  prebuf = new uint8_t[preBufSize + SIZE];
+  buf = prebuf + preBufSize;
+}
 
 FileEditor::~FileEditor(){
   closeFile();
 
-  delete[] buf;
+  delete[] prebuf;
+}
+
+void FileEditor::readChunk(){
+  if(!isWrite){
+    for(uint32_t i = 0; i<avail;i++){
+      prebuf[(preBufSize-avail)+i] = cur[i];
+    }
+    ssize_t readBytes = read(fd,buf,SIZE);
+    cur = buf-avail;
+    avail += readBytes;
+  }
 }
 
 //Loads a file and sets class variables
-bool FileEditor::loadFile(const char filepath[], bool truncate){
-  //Close Old file if was open
-  closeFile();
+bool FileEditor::loadFile(const char filepath[], bool write){
 
-  this->flags = O_RDONLY | O_BINARY;
-  this->truncate = truncate;
+  this->isWrite = write;
+
+  if(isWrite){
+    this->flags = O_WRONLY | O_TRUNC  | O_CREAT | O_BINARY;
+  } else this->flags = O_RDONLY | O_BINARY;
+
   this->fd = open(filepath,flags);
   this->filepath = filepath;
   if(fd<0){
     puts("ERROR: Could not find file");
     return false;
   }
+  //avail = 0;
+  readChunk();
 
   struct stat fileStats;
   fstat(fd,&fileStats);
   this->size = fileStats.st_size;
-  this->buf = new uint8_t[size];
-
-  avail = read(this->fd,this->buf,this->size);
-  loc = 0;
 
   return true;
 }
@@ -60,13 +77,35 @@ bool FileEditor::loadFile(const char filepath[], bool truncate){
    Returns number of bytes read of -1 if failed. 
  */
 int32_t FileEditor::readBytes(uint8_t* buf,uint32_t numBytes){
-  if(avail>=numBytes){
-    memcpy(buf,&this->buf[loc],numBytes);
-    avail-=numBytes;
-    loc+=numBytes;
 
-    return numBytes;
-  } else return -1;
+  if(!isWrite){
+
+    uint32_t numChunks = numBytes/SIZE;
+    if(numBytes % SIZE)
+      numChunks++;
+
+    uint32_t read = 0;
+
+    for(uint32_t i = 0; i < numChunks; i++){
+
+      if(i+1 == numChunks){
+        if(numBytes <= avail){
+          memcpy(buf + read,cur,numBytes);
+          return read + numBytes;
+        }else{
+          memcpy(buf + read,cur,avail);
+          return read + avail;
+        }
+      } else {
+        memcpy(buf + read,cur, avail);
+        read += avail;
+        numBytes -= avail;
+        avail = 0;
+      }
+      readChunk();
+    }
+  }
+  return -1;
 }
 
 //Getter Method for size, Also updates variable in case there was a size change
@@ -85,23 +124,29 @@ bool FileEditor::closeFile(){
 }
 
 int32_t FileEditor::writeBytes(uint8_t* buf, uint32_t numBytes){
-  if(this->fd<0)
-    return -1;
 
-  if(this->flags == (O_RDONLY | O_BINARY)){
-    closeFile();
-    this->flags = O_WRONLY | O_BINARY;
-    if(this->truncate)
-      this->flags |= O_TRUNC;
-    else this->flags |= O_APPEND;
-    this->fd = open(this->filepath,this->flags);
+  if(isWrite){
+    uint32_t numWrite = write(fd,buf,numBytes);
+    return numWrite;
   }
 
-  uint32_t numWrite = write(this->fd,buf,numBytes);
-  return numWrite;
+  return -1;
 }
 
 uint32_t FileEditor::filePointerLoc(){
   return this->loc;
 }
 
+uint8_t* FileEditor::getBuffer(){
+  return this->buf;
+}
+
+void FileEditor::makeTemp(){
+  std::string temp = this->filepath;
+  temp += ".tmp";
+  if(fd>-1){
+    rename(this->filepath,temp.c_str());
+
+  }
+
+}

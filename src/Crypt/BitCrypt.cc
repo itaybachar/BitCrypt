@@ -41,37 +41,56 @@ bool BitCrypt::encryptFile(const char* filepath,const char* key, uint32_t keyLen
 
   //Create a file editor
   this->_f->loadFile(filepath);
+  this->_f->makeTemp(); //Rename file as temp
 
-  //Add Header
+  //Create new file for writing
+  FileEditor outFile;
+  outFile.loadFile(filepath,true);
+
+  //Write Header to file
+  outFile.writeBytes(&this->_keyLen,1);
+
+  //Total Size of final Document (w/o 1 byte head)
   uint32_t expandedSize = this->_headerSize + this->_f->fileSize();
-  uint32_t totalChunks = expandedSize/this->_f->MAX_BUF_SIZE;
-  if(expandedSize%this->_f->MAX_BUF_SIZE)
+
+  uint32_t totalChunks = expandedSize/this->_f->SIZE;
+
+  if(expandedSize%this->_f->SIZE)
     totalChunks++;
 
-  uint8_t* expandedInput = new uint8_t[this->_f->MAX_BUF_SIZE];
+  //Size is 2^15 or 2048 AES iterations(states)
+  uint8_t* encryptionChunk = new uint8_t[this->_f->SIZE];
+
+  uint32_t curChunkSize = _headerSize;
+
   //Set Hash
-  memcpy(&expandedInput[0],hash,this->_hashLen);
+  memcpy(&encryptionChunk[0],hash,this->_hashLen);
   //If 192, set the next 8 bytes to 0x0
   if(this->_keyLen == AES_192)
-    memset(&expandedInput[24],0x0,8);
+    memset(&encryptionChunk[24],0x0,8);
 
-  //Copy rest of file into the new input
-  memcpy(&expandedInput[this->_headerSize],this->_f->getBuffer(),this->_f->fileSize());
+  //Read file into the rest of the space 
+  curChunkSize += this->_f->readBytes(&encryptionChunk[this->_headerSize],this->_f->SIZE-this->_headerSize);
 
-  //Encrypt expanded input with the hash
+  //Encrypt first chunk
   uint32_t outLen = 0;
-  uint8_t* encryptedInput = this->_aes->encrypt(expandedInput, expandedSize, hash,this->_hashLen,&outLen);
+  uint8_t* encryptedInput = this->_aes->encrypt(encryptionChunk, curChunkSize, hash,this->_hashLen,&outLen);
 
-  //Write AES type
-  this->_f->writeBytes(&this->_keyLen,1);
+  //Write first chunk
+  outFile.writeBytes(encryptedInput,outLen);
 
-  for(uint32_t i = 0; i<totalChunks; i++){
+  for(uint32_t i = 1; i<totalChunks; i++){
+    //Read the next chunk from the file
+    curChunkSize = this->_f->readBytes(encryptionChunk,this->_f->SIZE);
 
+    //Encrypt first chunk
+    encryptedInput = this->_aes->encrypt(encryptionChunk, curChunkSize, hash,this->_hashLen,&outLen);
 
+    //Write first chunk
+    outFile.writeBytes(encryptedInput,outLen);
   }
 
   //Write Encrypted Hash and file
-  this->_f->writeBytes(encryptedInput,outLen);
   this->_f->closeFile();
 
   return true;
@@ -90,10 +109,10 @@ uint8_t* BitCrypt::_hashKey(const char* key, uint32_t keyLen){
 //   0: Header Found, passwords do not match
 //   1: Header Found, passwords match
 int8_t BitCrypt::checkFile(const char* filepath, const char* key, uint32_t keyLen){
-  //Load File into memory
+  //Load File
   this->_f->loadFile(filepath);
 
-  //Read first Byte
+  //Read AES Type
   uint8_t encType = 0;
   this->_f->readBytes(&encType,1);
 
@@ -116,8 +135,8 @@ int8_t BitCrypt::checkFile(const char* filepath, const char* key, uint32_t keyLe
     uint8_t* decryptedHash = this->_aes->decrypt(inputHash,this->_headerSize,hashedKey,this->_hashLen, &outLen);
 
     return _compareHash(hashedKey,decryptedHash,this->_hashLen);
-
-  }else return -1;
+  }
+  return -1;
 }
 
 bool BitCrypt::_compareHash(uint8_t* h1, uint8_t* h2, uint32_t size){
