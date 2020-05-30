@@ -32,8 +32,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msha -pthread ${CMAKE_C_FLAGS_DEBUG}")
 add_subdirectory(src)
 
 #Create exe
-add_executable(BitCrypt src/main.cc)
-#add_executable(BitCrypt src/app/App.cc)
+#add_executable(BitCrypt src/main.cc)
+add_executable(BitCrypt src/app/App.cc)
 
 #Link executable
 target_link_libraries(BitCrypt App)

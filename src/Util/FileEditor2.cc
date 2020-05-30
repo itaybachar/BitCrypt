@@ -118,3 +118,20 @@ ssize_t FileEditor2::writeBytes(uint8_t* buf, uint32_t numBytes){
     return write(m_fd,buf,numBytes);
   }
 }
+
+void FileEditor2::skip(uint32_t num){
+  if(m_flags  == (O_RDONLY | O_BINARY) && num <= s_SIZE){
+
+    //If another chunk of data is needed
+    if(num>m_avail)
+      readChunk();
+    
+    if(num>m_avail){
+      m_cur += m_avail;
+      m_avail = 0;
+      return;
+    }
+    m_cur += num;
+    m_avail -= num;
+  }
+}

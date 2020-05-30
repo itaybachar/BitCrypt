@@ -7,7 +7,7 @@
 #define AES_256 0b0100
 
 class AES;
-class FileEditor;
+class FileEditor2;
 
 class BitCrypt{
 private:
@@ -22,11 +22,12 @@ private:
 
   const uint8_t salt[_saltLen] = {0x6b, 0x42, 0x33, 0x3b, 0x70, 0x4b, 0x31, 0x23, 0x62, 0x47, 0x38, 0x7d, 0x6c, 0x58, 0x33, 0x29}; 
   uint8_t _hashLen;
+
   //This contains the type of AES and the encrypted hash. If AES 192 is used,
   //The size becomes 32+1, 16 bytes is a size of a state in AES so we round up.
   uint32_t _headerSize;
   AES* _aes;
-  FileEditor* _f;
+  FileEditor2* _f;
 
 private:
 
