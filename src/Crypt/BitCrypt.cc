@@ -172,11 +172,12 @@ bool BitCrypt::decryptFile(const char* filepath, const char* key, uint32_t keyLe
 
 void BitCrypt::_cleanDecryption(uint8_t* in, uint32_t* size){
   uint32_t count = 0;
-  for(uint32_t i = 0; i<*size;i++)
-    if(i == *size-1 && in[i] == 0x0)
-      count++;
-    else if(in[i] == in[i+1] && in[i] == 0x0)
-      count++;
+  while(in[*size-1-count] == 0x0){
+    count++;
+    if(*size == count)
+      break;
+  }
+  
   *size = *size-count;
 }
 
