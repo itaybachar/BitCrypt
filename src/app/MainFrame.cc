@@ -167,7 +167,6 @@ void MainFrame::loadFile(wxTreeEvent& event){
   if(!fileTree->ItemHasChildren(id) && id != root){
     wxString path = fileTree->GetItemText(id);
 
-    int i =path.Cmp(fileLocation->GetLabel());
     if(path.Cmp(fileLocation->GetLabel())){
 
       encFileButton->Disable();

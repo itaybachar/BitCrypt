@@ -1,13 +1,13 @@
 #pragma once
 
 #include <stdint.h>
+#include "AES.hh"
 
 #define AES_128 0b0001
 #define AES_192 0b0010
 #define AES_256 0b0100
 
 class AES;
-class FileEditor2;
 
 class BitCrypt{
 private:
@@ -26,8 +26,7 @@ private:
   //This contains the type of AES and the encrypted hash. If AES 192 is used,
   //The size becomes 32+1, 16 bytes is a size of a state in AES so we round up.
   uint32_t _headerSize;
-  AES* _aes;
-  FileEditor2* _f;
+  AES _aes;
 
 private:
 

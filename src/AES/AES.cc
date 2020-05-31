@@ -4,6 +4,11 @@
 AES::AES(uint32_t key_len):
   _Nb(4)
 {
+  setType(key_len);
+  this->block_byte_size = this->_Nb * 4;
+}
+
+void AES::setType(uint32_t key_len){
   this->_Nk = key_len/32;
   switch(this->_Nk){
     case 4:
@@ -18,7 +23,6 @@ AES::AES(uint32_t key_len):
     default:
       throw std::runtime_error("Bad Key Length");
   }
-  this->block_byte_size = this->_Nb * 4;
 }
 
 //Encrypt a single block
@@ -55,6 +59,10 @@ void AES::_encryptBlock(uint8_t in[], uint8_t out[], uint8_t key[]){
       out[r+c*4] = state[r][c];
     }
   }
+  delete[] w;
+
+  delete[] *state;
+  delete[] state;
 }
 
 //Calculate extra padding to make input divisible by a block
@@ -125,7 +133,7 @@ void AES::_keyExpansion(uint8_t key[], uint8_t w[]){
   }
 
   i = 4*this->_Nk;
-  while(i < 4 * this->_Nb*(1+this->_Nr)){
+  while(i < 4 * this->_Nb*(1u+this->_Nr)){
     //Copy Last Key into temp
     temp[0] = w[i-4];
     temp[1] = w[i-3];
@@ -231,13 +239,12 @@ void AES::_shiftRows(uint8_t** state){
 
 uint8_t AES::_mulBytes(uint8_t a, uint8_t b){
   uint8_t p = 0x0;
-  uint8_t bit = 0x0,low_bit = 0x01, high_bit = 0x80;
+  uint8_t low_bit = 0x01, high_bit = 0x80;
   uint8_t carry = 0x0;
 
   for(uint8_t i = 0; i < 8;i++){
     if(b&low_bit)
       p= p^ a;
-
 
     b= b >> 1;
     carry = a&high_bit;
@@ -314,6 +321,10 @@ void AES::_decryptBlock(uint8_t in[], uint8_t out[], uint8_t key[]){
       out[r+c*4] = state[r][c];
     }
   }
+
+  delete[] w;
+  delete[] *state;
+  delete[] state;
 }
 
 void AES::_invShiftRows(uint8_t** state){

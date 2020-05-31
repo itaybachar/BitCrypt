@@ -9,8 +9,6 @@ private:
   uint8_t _Nk;
   uint8_t _Nr;
   uint32_t block_byte_size;
- // inline static constexpr uint8_t INVALID_KEY_LEN = 10;
- // inline static constexpr uint8_t INVALID_INPUT_FILE = 11;
 private:
   bool _keyCheck(uint8_t len);
 
@@ -48,6 +46,7 @@ public:
 
   uint8_t* decrypt(uint8_t in[], uint32_t in_len, uint8_t key[],uint8_t key_len, uint32_t* out_len);
 
+  void setType(uint32_t keyLen);
 };
 
 //sbox tables

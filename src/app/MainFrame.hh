@@ -24,8 +24,8 @@ private:
   wxMenu* options;
 
 private:
-  bool hidingPass;
   uint8_t m_keyLen;
+  bool hidingPass;
   BitCrypt* crypt;
 
   DECLARE_EVENT_TABLE();

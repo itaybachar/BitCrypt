@@ -1,20 +1,13 @@
 #include <iostream>
-#include "FileEditor2.hh"
+#include "BitCrypt.hh"
 
 int main(){
-  
-  FileEditor2 f1("/home/itay/Desktop/2020 W4 Crestron - Itay Bachar.pdf");
-  auto f2 = f1.prepareFile();
+  BitCrypt b(AES_128);
 
-  uint8_t* in = new uint8_t[FileEditor2::s_SIZE];
-
-  ssize_t read = 0;
-  while((read = f1.readBytes(in,FileEditor2::s_SIZE)) > 0){
-
-    f2->writeBytes(in,read);
-
-  }
-
+  const char* file = "/home/itay/Desktop/2020 W4 Crestron - Itay Bachar.pdf";
+  const char* file2 = "/home/itay/Desktop/2020 W4 Crestron - Itay Bachar.pdf.tmp";
+  b.encryptFile(file,"hi",2);
+  b.decryptFile(file,"hi",2);
 
   return 0;
 }

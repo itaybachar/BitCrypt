@@ -88,28 +88,39 @@ void FileEditor2::readChunk(){
 //numBytes must be <= s_SIZE
 ssize_t FileEditor2::readBytes(uint8_t* buf, uint32_t numBytes){
   if(m_flags  == (O_RDONLY | O_BINARY) && numBytes <= s_SIZE){
+    uint8_t* tmp = buf;
+    ssize_t totalRead = 0;
 
     //If another chunk of data is needed
-    if(numBytes>m_avail)
+    if(numBytes>m_avail){
+      memcpy(tmp,m_cur,m_avail);
+      m_cur += m_avail;
+      numBytes-=m_avail;
+      tmp += m_avail;
+      totalRead+=m_avail;
+      m_avail = 0;
       readChunk();
+    }
 
     //If still missing bytes(if eof) then return what is left
     if(numBytes>m_avail){
-      memcpy(buf,m_cur,m_avail);
+      memcpy(tmp,m_cur,m_avail);
       m_cur += m_avail;
 
-      ssize_t totalRead = m_avail;
+      totalRead += m_avail;
       m_avail = 0;
       return totalRead;
     }
 
     //Finally, if there is enough data, copy
-    memcpy(buf,m_cur,numBytes);
+    memcpy(tmp,m_cur,numBytes);
     m_cur += numBytes;
     m_avail -= numBytes;
+    totalRead +=numBytes;
 
-    return numBytes;
+    return totalRead;
   }
+  return 0;
 }
 
 //User write method
@@ -117,6 +128,7 @@ ssize_t FileEditor2::writeBytes(uint8_t* buf, uint32_t numBytes){
   if(m_flags & O_WRONLY){
     return write(m_fd,buf,numBytes);
   }
+  return 0;
 }
 
 void FileEditor2::skip(uint32_t num){
