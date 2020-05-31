@@ -3,6 +3,7 @@
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 #include <wx/dir.h>
+
 #include "BitCrypt.hh"
 
 class MainFrame : public wxFrame{
@@ -25,10 +26,9 @@ private:
 
 private:
   uint8_t m_keyLen;
-  bool hidingPass;
-  BitCrypt* crypt;
+  bool m_hidingPass;
+  BitCrypt crypt;
 
-  DECLARE_EVENT_TABLE();
 public:
   MainFrame();
   ~MainFrame();
@@ -44,5 +44,8 @@ public:
   void helpBox(wxCommandEvent& event);
   void passChange(wxCommandEvent& event);
 private:
-  void _doLayout();
+  void doLayout();
+  void updateLayout();
+
+  DECLARE_EVENT_TABLE();
 };

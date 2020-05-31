@@ -1,18 +1,16 @@
-#include "FileEditor.hh"
+#include <FileEditor.hh>
+
+//File control
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <cstring>
 
 //String
 #include <string>
 
-//File Reading
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-#include <stdio.h>
 #include <stdexcept>
-
-//Memcpy
-#include <cstring>
 
 //Check for O_BINARY, needed for Windows writing
 #ifndef O_BINARY

@@ -1,16 +1,14 @@
 #include "App.hh"
 
-
 IMPLEMENT_APP(App); //Creates main function
 
-App::App() {
-}
+App::App() {}
 
 App::~App() {}
 
 bool App::OnInit(){
-  _main = new MainFrame();
-  _main->Show(true);
+  m_main = new MainFrame();
+  m_main->Show(true);
 
   return true;
 }

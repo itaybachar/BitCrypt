@@ -3,7 +3,8 @@
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wxDefaultPosition, wxDefaultSize),
   m_keyLen(AES_128),
-  hidingPass(false)
+  m_hidingPass(false),
+  crypt(AES_128)
 {
   //Icon
   SetIcon(lock_icon);
@@ -17,9 +18,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wx
   file->AppendSubMenu(options,"AES Options");
   file->AppendSeparator();
   file->Append(wxID_EXIT, "Quit");
-  
+
   help->Append(wxID_HELP, "Help");
-  
+
   options->AppendRadioItem(0,"AES_128");
   options->AppendRadioItem(1,"AES_192");
   options->AppendRadioItem(2,"AES_256");
@@ -64,7 +65,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wx
 
   fileTree->SetBackgroundColour(buttonsCol);
   fileTree->SetForegroundColour(textCol);
-  
+
   hideCtrl->SetForegroundColour(textCol);
 
   passwordBox->SetBackgroundColour(textCol);
@@ -72,10 +73,8 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wx
   checkFileButton->Disable();
   encFileButton->Disable();
   decFileButton->Disable();
-  crypt = new BitCrypt(m_keyLen);
-  _doLayout();
+  doLayout();
 
-  SetMinSize(wxSize(600,475));
   //Positions frame in the center of the screen
   Centre();
 
@@ -85,7 +84,7 @@ MainFrame::~MainFrame(){
 
 }
 
-void MainFrame::_doLayout(){
+void MainFrame::doLayout(){
   wxColour textCol;
   textCol.Set("#ECECEC");
   //Create Sizers
@@ -125,7 +124,9 @@ void MainFrame::_doLayout(){
 
   //Set Frame sizer
   SetSizer(mainSizer);
-  Layout();
+  SetMinSize(wxWindow::GetBestSize());
+
+  updateLayout();
 };
 
 //Choose Folder Action
@@ -158,6 +159,9 @@ void MainFrame::chooseDir(wxCommandEvent& event){
   }
   dir.Close();
   fileTree->ExpandAll();
+
+  updateLayout();
+
   event.Skip();
 }
 
@@ -186,12 +190,14 @@ void MainFrame::loadFile(wxTreeEvent& event){
     }
     checkFileButton->Enable();
   }
+
+  updateLayout();
   event.Skip();
 }
 
 //CheckBox Action
 void MainFrame::hidePass(wxCommandEvent& event){
-  hidingPass = true;
+  m_hidingPass = true;
   wxSizer* szr = passwordBox->GetContainingSizer();
   wxString pass = passwordBox->GetValue();
   uint16_t s = (hideCtrl->IsChecked()?0:wxTE_PASSWORD);
@@ -201,12 +207,14 @@ void MainFrame::hidePass(wxCommandEvent& event){
   szr->Add(passwordBox, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT, 0);
   szr->Layout();
 
+  updateLayout();
+  m_hidingPass = false;
+
   event.Skip();
-  hidingPass = false;
 }
 
 void MainFrame::checkPass(wxCommandEvent& event){
-  int8_t out = crypt->checkFile(m_currentFilePath,passwordBox->GetValue(),passwordBox->GetValue().Len());
+  int8_t out = crypt.checkFile(m_currentFilePath,passwordBox->GetValue(),passwordBox->GetValue().Len());
 
   wxMessageDialog dialog(this,wxEmptyString);
   switch(out){
@@ -232,7 +240,7 @@ void MainFrame::checkPass(wxCommandEvent& event){
 }
 void MainFrame::encryptEvent(wxCommandEvent& event){
   wxString pass = passwordBox->GetValue();
-  crypt->encryptFile(m_currentFilePath,pass,pass.Len());
+  crypt.encryptFile(m_currentFilePath,pass,pass.Len());
 
   wxMessageDialog dialog(this,"Encryption Successful!");
   dialog.ShowModal();
@@ -242,7 +250,7 @@ void MainFrame::encryptEvent(wxCommandEvent& event){
 }
 void MainFrame::decryptEvent(wxCommandEvent& event){
   wxString pass = passwordBox->GetValue();
-  crypt->decryptFile(m_currentFilePath,pass,pass.Len());
+  crypt.decryptFile(m_currentFilePath,pass,pass.Len());
 
   wxMessageDialog dialog(this,"Decryption Successful!");
   dialog.ShowModal();
@@ -255,7 +263,7 @@ void MainFrame::menuBar(wxCommandEvent& event){
   uint32_t id = event.GetId();
   if(id == wxID_EXIT)
     Close(true);
-  
+
   if(id == 0){
     m_keyLen = AES_128;
   }else if(id == 1){
@@ -263,21 +271,26 @@ void MainFrame::menuBar(wxCommandEvent& event){
   }else if(id == 2){
     m_keyLen = AES_256;
   }
-  crypt->setEncryptionType(m_keyLen);
+  crypt.setEncryptionType(m_keyLen);
   event.Skip();
 }
 
 void MainFrame::helpBox(wxCommandEvent& event){
   wxMessageBox("1) Choose a File\n2)Check the File(with or without a password)\n3)Proper Actions will be unlocked",
-                "BitCrypt Help", wxOK | wxICON_INFORMATION);
+      "BitCrypt Help", wxOK | wxICON_INFORMATION);
 
   event.Skip();
 }
 
 void MainFrame::passChange(wxCommandEvent& event){
-  if(!hidingPass && decFileButton->IsEnabled())
+  if(!m_hidingPass && decFileButton->IsEnabled())
     decFileButton->Disable();
   event.Skip();
+}
+
+void MainFrame::updateLayout(){
+  SetSize(wxWindow::GetBestSize());
+  Layout();
 }
 
 BEGIN_EVENT_TABLE(MainFrame,wxFrame)
