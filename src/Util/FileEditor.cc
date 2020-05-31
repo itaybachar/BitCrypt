@@ -8,8 +8,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-//Puts
 #include <stdio.h>
+#include <stdexcept>
 
 //Memcpy
 #include <cstring>
@@ -19,134 +19,131 @@
 #define O_BINARY 0
 #endif
 
-FileEditor::FileEditor():
-  fd(-1),
-  size(0),
-  loc(0),
-  flags(0),
-  avail(0)
+FileEditor::FileEditor(const char* filepath, bool write) :
+  m_avail(0),
+  m_filepath(filepath)
 {
-  prebuf = new uint8_t[preBufSize + SIZE];
-  buf = prebuf + preBufSize;
+  //Open File
+  if(write){
+    m_flags = O_WRONLY | O_BINARY | O_CREAT;
+    m_fd = open(m_filepath,m_flags,S_IRUSR | S_IWUSR);
+
+    if(m_fd<0)
+      throw std::runtime_error("Could not open file for writing!");
+
+  }else{
+    m_flags = O_RDONLY | O_BINARY;
+    m_fd = open(m_filepath,m_flags);
+
+    if(m_fd<0)
+      throw std::runtime_error("Could not open file for reading!");
+
+    //Prepare read buffer
+    m_prebuf = new uint8_t[s_SIZE + s_PREBUFSIZE];
+    m_buf = m_prebuf + s_PREBUFSIZE;
+    m_cur = m_buf;
+  }
 }
 
 FileEditor::~FileEditor(){
-  closeFile();
+  //Close Current File
+  if(m_fd>=0)
+    close(m_fd);
 
-  delete[] prebuf;
+  //Delete Buffers
+  delete[] m_prebuf;
 }
 
+//Takes in the input file(to read), renames it to ***.tmp and creates 
+//another FileEditor creating a new file with the original name for wiritng
+FileEditor* FileEditor::prepareFile(){
+  //Rename file
+  std::string temp = m_filepath;
+  temp += ".tmp";
+  rename(m_filepath, temp.c_str());
+
+  //Create new File Editor for writing
+  FileEditor* writeFile = new FileEditor(m_filepath,true);
+
+  //Update member variable
+  m_filepath = temp.c_str();
+
+  return writeFile;
+}
+
+//Reads the next chunk of data to the buffer
 void FileEditor::readChunk(){
-  if(!isWrite){
-    for(uint32_t i = 0; i<avail;i++){
-      prebuf[(preBufSize-avail)+i] = cur[i];
-    }
-    ssize_t readBytes = read(fd,buf,SIZE);
-    cur = buf-avail;
-    avail += readBytes;
+  //Copy excess bytes into prebuf
+  for(uint32_t i = 0; i<m_avail;i++){
+    m_prebuf[(s_PREBUFSIZE-m_avail)+i] = m_cur[i];
   }
+
+  //load the next chunk into memory
+  ssize_t bytesRead = read(m_fd,m_buf,s_SIZE);
+  m_cur = m_buf-m_avail;
+  m_avail += bytesRead;
 }
 
-//Loads a file and sets class variables
-bool FileEditor::loadFile(const char filepath[], bool write){
+//User read method using readChunk
+//numBytes must be <= s_SIZE
+ssize_t FileEditor::readBytes(uint8_t* buf, uint32_t numBytes){
+  if(m_flags  == (O_RDONLY | O_BINARY) && numBytes <= s_SIZE){
+    uint8_t* tmp = buf;
+    ssize_t totalRead = 0;
 
-  this->isWrite = write;
-
-  if(isWrite){
-    this->flags = O_WRONLY | O_TRUNC  | O_CREAT | O_BINARY;
-  } else this->flags = O_RDONLY | O_BINARY;
-
-  this->fd = open(filepath,flags);
-  this->filepath = filepath;
-  if(fd<0){
-    puts("ERROR: Could not find file");
-    return false;
-  }
-  //avail = 0;
-  readChunk();
-
-  struct stat fileStats;
-  fstat(fd,&fileStats);
-  this->size = fileStats.st_size;
-
-  return true;
-}
-
-/*
-   Reads the currently loaded file(if its size is more than 0)
-   Returns number of bytes read of -1 if failed. 
- */
-int32_t FileEditor::readBytes(uint8_t* buf,uint32_t numBytes){
-
-  if(!isWrite){
-
-    uint32_t numChunks = numBytes/SIZE;
-    if(numBytes % SIZE)
-      numChunks++;
-
-    uint32_t read = 0;
-
-    for(uint32_t i = 0; i < numChunks; i++){
-
-      if(i+1 == numChunks){
-        if(numBytes <= avail){
-          memcpy(buf + read,cur,numBytes);
-          return read + numBytes;
-        }else{
-          memcpy(buf + read,cur,avail);
-          return read + avail;
-        }
-      } else {
-        memcpy(buf + read,cur, avail);
-        read += avail;
-        numBytes -= avail;
-        avail = 0;
-      }
+    //If another chunk of data is needed
+    if(numBytes>m_avail){
+      memcpy(tmp,m_cur,m_avail);
+      m_cur += m_avail;
+      numBytes-=m_avail;
+      tmp += m_avail;
+      totalRead+=m_avail;
+      m_avail = 0;
       readChunk();
     }
+
+    //If still missing bytes(if eof) then return what is left
+    if(numBytes>m_avail){
+      memcpy(tmp,m_cur,m_avail);
+      m_cur += m_avail;
+
+      totalRead += m_avail;
+      m_avail = 0;
+      return totalRead;
+    }
+
+    //Finally, if there is enough data, copy
+    memcpy(tmp,m_cur,numBytes);
+    m_cur += numBytes;
+    m_avail -= numBytes;
+    totalRead +=numBytes;
+
+    return totalRead;
   }
-  return -1;
+  return 0;
 }
 
-//Getter Method for size, Also updates variable in case there was a size change
-uint32_t FileEditor::fileSize(){
-  //Update size
-  struct stat buf;
-  fstat(fd,&buf);
-  this->size = buf.st_size;
-
-  return this->size;
-}
-
-//Closes current file
-bool FileEditor::closeFile(){
-  return close(this->fd);
-}
-
-int32_t FileEditor::writeBytes(uint8_t* buf, uint32_t numBytes){
-
-  if(isWrite){
-    uint32_t numWrite = write(fd,buf,numBytes);
-    return numWrite;
+//User write method
+ssize_t FileEditor::writeBytes(uint8_t* buf, uint32_t numBytes){
+  if(m_flags & O_WRONLY){
+    return write(m_fd,buf,numBytes);
   }
-
-  return -1;
+  return 0;
 }
 
-uint32_t FileEditor::filePointerLoc(){
-  return this->loc;
-}
+void FileEditor::skip(uint32_t num){
+  if(m_flags  == (O_RDONLY | O_BINARY) && num <= s_SIZE){
 
-uint8_t* FileEditor::getBuffer(){
-  return this->buf;
-}
-
-void FileEditor::makeTemp(){
-  std::string temp = this->filepath;
-  temp += ".tmp";
-  if(fd>-1){
-    rename(this->filepath,temp.c_str());
-
+    //If another chunk of data is needed
+    if(num>m_avail)
+      readChunk();
+    
+    if(num>m_avail){
+      m_cur += m_avail;
+      m_avail = 0;
+      return;
+    }
+    m_cur += num;
+    m_avail -= num;
   }
-
 }

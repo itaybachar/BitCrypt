@@ -1,7 +1,7 @@
 #include "BitCrypt.hh"
 
 #include "argon2.h"
-#include "FileEditor2.hh"
+#include "FileEditor.hh"
 
 #include <cstring>
 
@@ -36,7 +36,7 @@ void BitCrypt::_updateKeyLen(){
 
 bool BitCrypt::encryptFile(const char* filepath,const char* key, uint32_t keyLen){
   //Declaring variables
-  uint8_t* in = new uint8_t[FileEditor2::s_SIZE];
+  uint8_t* in = new uint8_t[FileEditor::s_SIZE];
   uint8_t* out;
   uint32_t outLen = 0;
 
@@ -44,8 +44,8 @@ bool BitCrypt::encryptFile(const char* filepath,const char* key, uint32_t keyLen
   uint8_t* hash = _hashKey(key,keyLen);
 
   //Load file and prepare it
-  FileEditor2 inFile(filepath);
-  FileEditor2* outFile = inFile.prepareFile();
+  FileEditor inFile(filepath);
+  FileEditor* outFile = inFile.prepareFile();
 
   //Write Header to file
   outFile->writeBytes(&this->_keyLen,1);
@@ -56,7 +56,7 @@ bool BitCrypt::encryptFile(const char* filepath,const char* key, uint32_t keyLen
 
   //Encrypt rest of file
   ssize_t read = 0;
-  while((read = inFile.readBytes(in,FileEditor2::s_SIZE)) > 0){
+  while((read = inFile.readBytes(in,FileEditor::s_SIZE)) > 0){
     out = _aes.encrypt(in, read, hash, _hashLen, &outLen);
     outFile->writeBytes(out,outLen);
     delete[] out;
@@ -82,7 +82,7 @@ uint8_t* BitCrypt::_hashKey(const char* key, uint32_t keyLen){
 //   1: Header Found, passwords match
 int8_t BitCrypt::checkFile(const char* filepath, const char* key, uint32_t keyLen){
   //Load File
-  FileEditor2 inFile(filepath);
+  FileEditor inFile(filepath);
 
   //Read AES Type
   uint8_t encType = 0;
@@ -126,7 +126,7 @@ bool BitCrypt::_compareHash(uint8_t* h1, uint8_t* h2, uint32_t size){
 
 bool BitCrypt::decryptFile(const char* filepath, const char* key, uint32_t keyLen){
   //Declaring variables
-  uint8_t* in = new uint8_t[FileEditor2::s_SIZE];
+  uint8_t* in = new uint8_t[FileEditor::s_SIZE];
   uint8_t* out;
   uint32_t outLen = 0;
 
@@ -134,8 +134,8 @@ bool BitCrypt::decryptFile(const char* filepath, const char* key, uint32_t keyLe
   uint8_t* hash = _hashKey(key,keyLen);
 
   //Load file and prepare it
-  FileEditor2 inFile(filepath);
-  FileEditor2*  outFile = inFile.prepareFile();
+  FileEditor inFile(filepath);
+  FileEditor*  outFile = inFile.prepareFile();
 
   //Skip header and hash
   inFile.skip(1);
@@ -143,7 +143,7 @@ bool BitCrypt::decryptFile(const char* filepath, const char* key, uint32_t keyLe
 
   //Encrypt rest of file
   ssize_t read = 0;
-  while((read = inFile.readBytes(in,FileEditor2::s_SIZE)) > 0){
+  while((read = inFile.readBytes(in,FileEditor::s_SIZE)) > 0){
     out = _aes.decrypt(in, read, hash, _hashLen, &outLen);
     _cleanDecryption(out, &outLen);
     outFile->writeBytes(out,outLen);
