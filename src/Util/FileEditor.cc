@@ -36,6 +36,11 @@ FileEditor::FileEditor(const char* filepath, bool write) :
     if(m_fd<0)
       throw std::runtime_error("Could not open file for reading!");
 
+	//Get file size
+	struct stat fileStats;
+	fstat(m_fd, &fileStats);
+	this->m_size = fileStats.st_size;
+
     //Prepare read buffer
     m_prebuf = new uint8_t[s_SIZE + s_PREBUFSIZE];
     m_buf = m_prebuf + s_PREBUFSIZE;
@@ -151,4 +156,8 @@ void FileEditor::skip(uint32_t num){
 void FileEditor::deleteFile(){
   close(m_fd);
   remove(m_filepath);
+}
+
+uint64_t* FileEditor::getSize() {
+	return &m_size;
 }

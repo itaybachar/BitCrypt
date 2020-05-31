@@ -54,6 +54,15 @@ bool BitCrypt::encryptFile(const char* filepath,const char* key, uint32_t keyLen
   //Encrypt hash and write it to out
   out = m_aes.encrypt(hash, m_hashLen, hash, m_hashLen, &outLen);
   outFile->writeBytes(out,outLen);
+  delete[] out;
+
+  //Encrypt and Write Size to file
+  uint8_t sizePtr[8];
+  std::memcpy(sizePtr, inFile.getSize(), 8);
+
+  out = m_aes.encrypt(sizePtr, 8, hash, m_hashLen, &outLen);
+  outFile->writeBytes(out, outLen);
+  delete[] out;
 
   //Encrypt rest of file
   ssize_t read = 0;
@@ -131,7 +140,9 @@ bool BitCrypt::decryptFile(const char* filepath, const char* key, uint32_t keyLe
   //Declaring variables
   uint8_t* in = new uint8_t[FileEditor::s_SIZE];
   uint8_t* out;
-  uint32_t outLen = 0;
+  uint32_t outLen = 0; //size of current decrypted block
+  uint64_t outSize = 0; //size of original file
+  ssize_t read = 0;
 
   //Hash the input key
   uint8_t* hash = hashKey(key,keyLen);
@@ -144,12 +155,25 @@ bool BitCrypt::decryptFile(const char* filepath, const char* key, uint32_t keyLe
   inFile.skip(1);
   inFile.skip(m_headerSize);
 
+  //Read file size
+  read = inFile.readBytes(in, 16); //Read the next State block containing size
+  out = m_aes.decrypt(in, read, hash, m_hashLen, &outLen);
+  
+  memcpy(&outSize, out, 8);
+  delete[] out;
+
   //Encrypt rest of file
-  ssize_t read = 0;
   while((read = inFile.readBytes(in,FileEditor::s_SIZE)) > 0){
     out = m_aes.decrypt(in, read, hash, m_hashLen, &outLen);
-    cleanDecryption(out, &outLen);
+	if(read != FileEditor::s_SIZE)
+		//cleanDecryption(out, &outLen);
+
+	if (outSize < outLen)
+		outLen = outSize;
+
     outFile->writeBytes(out,outLen);
+	outSize -= outLen;
+
     delete[] out;
   }
 

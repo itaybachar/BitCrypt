@@ -11,6 +11,7 @@ private:
 
   int32_t m_fd; //File Descriptor 
   uint32_t m_flags; //File Flags
+  uint64_t m_size; //File Size
   const char* m_filepath;
 public:
   static const uint32_t s_SIZE = 32768;
@@ -27,6 +28,7 @@ public:
   FileEditor* prepareFile();
   void skip(uint32_t num);
   void deleteFile();
+  uint64_t* getSize();
 
   //IO
   ssize_t readBytes(uint8_t* buf, uint32_t numBytes);
