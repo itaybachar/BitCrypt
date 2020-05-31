@@ -26,6 +26,7 @@ public:
   //Util
   FileEditor* prepareFile();
   void skip(uint32_t num);
+  void deleteFile();
 
   //IO
   ssize_t readBytes(uint8_t* buf, uint32_t numBytes);

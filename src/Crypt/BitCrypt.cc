@@ -62,7 +62,9 @@ bool BitCrypt::encryptFile(const char* filepath,const char* key, uint32_t keyLen
     delete[] out;
   }
 
-  delete outFile;
+  //Delete Tmp file
+  inFile.deleteFile();
+
   delete[] in;
   delete[] hash;
   return true;
@@ -114,7 +116,6 @@ int8_t BitCrypt::checkFile(const char* filepath, const char* key, uint32_t keyLe
 }
 
 bool BitCrypt::_compareHash(uint8_t* h1, uint8_t* h2, uint32_t size){
-
   for(uint32_t i = 0; i<size;i++){
     if(h1[i] != h2[i]){
       return false;
@@ -150,7 +151,9 @@ bool BitCrypt::decryptFile(const char* filepath, const char* key, uint32_t keyLe
     delete[] out;
   }
 
-  delete outFile;
+  //Delete tmp File
+  inFile.deleteFile();
+
   delete[] in;
   delete[] hash;
   return true;

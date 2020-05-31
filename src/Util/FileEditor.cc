@@ -50,7 +50,6 @@ FileEditor::~FileEditor(){
   if(m_fd>=0)
     close(m_fd);
 
-  //Delete Buffers
   delete[] m_prebuf;
 }
 
@@ -58,15 +57,15 @@ FileEditor::~FileEditor(){
 //another FileEditor creating a new file with the original name for wiritng
 FileEditor* FileEditor::prepareFile(){
   //Rename file
-  std::string temp = m_filepath;
-  temp += ".tmp";
-  rename(m_filepath, temp.c_str());
+  std::string* temp = new std::string(m_filepath);
+  *temp += ".tmp";
+  rename(m_filepath, temp->c_str());
 
   //Create new File Editor for writing
   FileEditor* writeFile = new FileEditor(m_filepath,true);
 
   //Update member variable
-  m_filepath = temp.c_str();
+  m_filepath = temp->c_str();
 
   return writeFile;
 }
@@ -137,7 +136,7 @@ void FileEditor::skip(uint32_t num){
     //If another chunk of data is needed
     if(num>m_avail)
       readChunk();
-    
+
     if(num>m_avail){
       m_cur += m_avail;
       m_avail = 0;
@@ -146,4 +145,9 @@ void FileEditor::skip(uint32_t num){
     m_cur += num;
     m_avail -= num;
   }
+}
+
+void FileEditor::deleteFile(){
+  int out = remove(m_filepath);
+  out = out;
 }
