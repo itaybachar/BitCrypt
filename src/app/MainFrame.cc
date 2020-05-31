@@ -207,7 +207,6 @@ void MainFrame::hidePass(wxCommandEvent& event){
   szr->Add(passwordBox, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT, 0);
   szr->Layout();
 
-  updateLayout();
   m_hidingPass = false;
 
   event.Skip();

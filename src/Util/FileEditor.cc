@@ -57,6 +57,8 @@ FileEditor* FileEditor::prepareFile(){
   //Rename file
   std::string* temp = new std::string(m_filepath);
   *temp += ".tmp";
+
+  close(m_fd);
   rename(m_filepath, temp->c_str());
 
   //Create new File Editor for writing
@@ -64,6 +66,7 @@ FileEditor* FileEditor::prepareFile(){
 
   //Update member variable
   m_filepath = temp->c_str();
+  m_fd = open(m_filepath, m_flags);
 
   return writeFile;
 }
@@ -146,6 +149,6 @@ void FileEditor::skip(uint32_t num){
 }
 
 void FileEditor::deleteFile(){
-  int out = remove(m_filepath);
-  out = out;
+  close(m_fd);
+  remove(m_filepath);
 }

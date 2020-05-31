@@ -65,6 +65,7 @@ bool BitCrypt::encryptFile(const char* filepath,const char* key, uint32_t keyLen
 
   //Delete Tmp file
   inFile.deleteFile();
+  outFile->~FileEditor();
 
   delete[] in;
   delete[] hash;
@@ -154,6 +155,7 @@ bool BitCrypt::decryptFile(const char* filepath, const char* key, uint32_t keyLe
 
   //Delete tmp File
   inFile.deleteFile();
+  outFile->~FileEditor();
 
   delete[] in;
   delete[] hash;
