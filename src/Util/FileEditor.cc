@@ -53,7 +53,9 @@ FileEditor::~FileEditor(){
   if(m_fd>=0)
     close(m_fd);
 
-  delete[] m_prebuf;
+  //Delete Buffer if created
+  if(m_flags == (O_RDONLY | O_BINARY))
+	delete[] m_prebuf;
 }
 
 //Takes in the input file(to read), renames it to ***.tmp and creates 
