@@ -28,6 +28,7 @@ private:
   uint8_t m_keyLen;
   bool m_hidingPass;
   BitCrypt crypt;
+  class IntData;
 
 public:
   MainFrame();
@@ -46,6 +47,7 @@ public:
 private:
   void doLayout();
   void updateLayout();
+  void addDirRecurse(wxTreeItemId* parent, wxDir* curDir, wxString path);
 
   DECLARE_EVENT_TABLE();
 };

@@ -1,6 +1,21 @@
 #include "MainFrame.hh"
 #include "icon.xpm"
 
+//Inner class implementation
+class MainFrame::IntData : public wxTreeItemData {
+private:
+  uint8_t m_itemType; // 0 == file 1 == dir
+
+public:
+  IntData(uint8_t itemType) : 
+    m_itemType(itemType) {}
+  
+  bool isDir(){
+    return m_itemType;
+  }
+};
+
+//MainFrame Functions
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wxDefaultPosition, wxDefaultSize),
   m_keyLen(AES_128),
   m_hidingPass(false),
@@ -32,7 +47,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wx
   //Initialize Componenets
   browseButton = new wxButton(this, 10001,"Browse Folder");
   fileTree = new wxTreeCtrl(this, 10002);
-  root = fileTree->AddRoot("Please Select A Folder");
+  root = fileTree->AddRoot("Please Select A Folder",-1,-1,new IntData(1));
   fileTree->SelectItem(root,false);
   passwordBox = new wxTextCtrl(this, 10003,wxEmptyString,wxDefaultPosition,wxDefaultSize,wxTE_PASSWORD);
   hideCtrl = new wxCheckBox(this, 10004, "Show Password");
@@ -131,63 +146,77 @@ void MainFrame::doLayout(){
 
 //Choose Folder Action
 void MainFrame::chooseDir(wxCommandEvent& event){
-
   //Check that Item Selected is not already selected
   wxDir dir;
   dirDialog->SetPath("");
   bool open = false;
   int status = dirDialog->ShowModal();
+
   if(status == wxID_OK){
     fileTree->DeleteChildren(root);
     fileTree->SetItemText(root,dirDialog->GetPath());
     open = dir.Open(dirDialog->GetPath());
   }
 
-  wxString filename;
-  bool cont = false;
-  /*
-     cont = dir.GetFirst(&filename,wxEmptyString,wxDIR_DIRS);
-   */
-
   if(open){
-    cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
-    while(cont){
-      fileTree->AppendItem(root,filename,1);
-      fileTree->SelectItem(root,false);
-      cont = dir.GetNext(&filename);
-    }
+    addDirRecurse(&root,&dir,dirDialog->GetPath());
   }
   dir.Close();
-  fileTree->ExpandAll();
+  fileTree->Expand(root);
 
   updateLayout();
 
   event.Skip();
 }
 
+void MainFrame::addDirRecurse(wxTreeItemId* parent, wxDir* curdir, wxString path){
+
+  wxString filename;
+
+  bool cont = false;
+  //Add all Files
+  cont = curdir->GetFirst(&filename, wxEmptyString, wxDIR_FILES);
+  while(cont){
+    fileTree->AppendItem(*parent,filename,-1, -1, new IntData(0));
+    fileTree->SelectItem(*parent,false);
+    cont = curdir->GetNext(&filename);
+  }
+
+  //Call on next directory
+  cont = curdir->GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
+  while(cont){
+    wxTreeItemId subFolder = fileTree->AppendItem(*parent,filename,-1,-1, new IntData(1));
+
+    wxDir nextDir;
+    if(nextDir.Open(path + "/" + filename)){
+      addDirRecurse(&subFolder,&nextDir,path + "/" + filename);
+    }
+    nextDir.Close();
+    cont = curdir->GetNext(&filename);
+  }
+}
+
 //Tree Selection (double click)
 void MainFrame::loadFile(wxTreeEvent& event){
   wxTreeItemId id = event.GetItem();
-  if(!fileTree->ItemHasChildren(id) && id != root){
+  IntData* itemData = (IntData*)fileTree->GetItemData(id);
+  if(!itemData->isDir()){
     wxString path = fileTree->GetItemText(id);
 
-    if(path.Cmp(fileLocation->GetLabel())){
-
-      encFileButton->Disable();
-      decFileButton->Disable();
-      if(id != root){
-        wxTreeItemId par = fileTree->GetItemParent(id);
-        do{
-          path = fileTree->GetItemText(par) + "/" + path;
-          par = fileTree->GetItemParent(id);
-        }while(par != root);
-      }
-
-      m_currentFilePath = path;
-      fileLocation->SetLabel(fileTree->GetItemText(id));
-      Refresh();
-      Layout();
+    encFileButton->Disable();
+    decFileButton->Disable();
+    if(id != root){
+      wxTreeItemId par = fileTree->GetItemParent(id);
+      do{
+        path = fileTree->GetItemText(par) + "/" + path;
+        par = fileTree->GetItemParent(par);
+      }while(par != NULL);
     }
+
+    m_currentFilePath = path;
+    fileLocation->SetLabel(fileTree->GetItemText(id));
+    Refresh();
+    Layout();
     checkFileButton->Enable();
   }
 
