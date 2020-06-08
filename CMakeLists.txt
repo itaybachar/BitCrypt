@@ -10,44 +10,60 @@ set(CMAKE_CXX_STANDARD 11)
 
 #Out Directory Logic
 list(APPEND ADDITIONAL_LIBS)
-list(APPEND ADDITIONAL_FLAGS)
+list(APPEND CXX_COMPILE_FLAGS)
+list(APPEND C_COMPILE_FLAGS)
+
+#list(APPEND C_COMPILE_FLAGS -msha)
+add_compile_options(-Wall -Wextra -msha)
 if(WIN32)
   message("Compiling on Windows")
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/msw)
-  list(APPEND ADDITIONAL_LIBS "-luxtheme")
-  list(APPEND ADDITIONAL_FLAGS "-mwindows")
+  list(APPEND ADDITIONAL_LIBS "-luxtheme" "-static-libgcc" "-static-libstdc++")
+list(APPEND CXX_COMPILE_FLAGS "-mwindows")
+  add_compile_options(-mwindows -pthread)
 elseif(APPLE)
   message("Compiling on Apple")
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/osx)
 else()
   message("Compiling on Unix/Linux")
+  add_compile_options(-pthread)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/unx)
+  list(APPEND ADDITIONAL_LIBS "-static-libgcc" "-static-libstdc++")
 endif()
 
 #Compiler Flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -msha -pthread ${ADDITIONAL_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msha -pthread ${CMAKE_C_FLAGS_RELEASE}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
 
 #Link src
 add_subdirectory(src)
 
 #Create exe
-#add_executable(BitCrypt src/main.cc)
-add_executable(BitCrypt src/app/App.cc)
+if(APPLE)
+  set(MACOSX_BUNDLE_ICON icon.icns)
+  set_source_files_properties(res/icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+  add_executable(BitCrypt MACOSX_BUNDLE src/app/App.cc)
+else()
+  add_executable(BitCrypt src/app/App.cc)
+endif()
 
 #Link executable
 target_link_libraries(BitCrypt App)
 target_link_libraries(BitCrypt ${wxWidgets_LIBRARIES})
-target_link_libraries(BitCrypt -static-libgcc -static-libstdc++ ${ADDITIONAL_LIBS})
-
+target_link_libraries(BitCrypt ${ADDITIONAL_LIBS})
 
 #Install executale
-install(TARGETS BitCrypt)
-if(NOT WIN32)
+if(APPLE)
+  set(CMAKE_INSTALL_PREFIX /Applications)
+  install(TARGETS BitCrypt BUNDLE DESTINATION .)
+  set(APPS "\${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app")
+elseif(NOT WIN32)
+  install(TARGETS BitCrypt)  
   install(FILES res/unx/bitcrypt.desktop DESTINATION /usr/share/applications)
   install(FILES res/icon.xpm DESTINATION /usr/share/icons/BitCrypt)
+else()
+  install(TARGETS BitCrypt)
 endif()
-
 
 #Uninstall Script
 if(NOT TARGET uninstall)
@@ -59,4 +75,3 @@ if(NOT TARGET uninstall)
   add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
-
