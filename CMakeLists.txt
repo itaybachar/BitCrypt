@@ -5,6 +5,9 @@ project(BitCrypt)
 find_package(wxWidgets 3.1 COMPONENTS core base REQUIRED)
 include(${wxWidgets_USE_FILE})
 
+#Find Threading Library
+find_package(Threads REQUIRED)
+
 #Set Default Compiler
 set(CMAKE_CXX_STANDARD 11)
 
@@ -20,13 +23,12 @@ if(WIN32)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/msw)
   list(APPEND ADDITIONAL_LIBS "-luxtheme" "-static-libgcc" "-static-libstdc++")
 list(APPEND CXX_COMPILE_FLAGS "-mwindows")
-  add_compile_options(-mwindows -pthread)
+  add_compile_options(-mwindows)
 elseif(APPLE)
   message("Compiling on Apple")
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/osx)
 else()
   message("Compiling on Unix/Linux")
-  add_compile_options(-pthread)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/unx)
   list(APPEND ADDITIONAL_LIBS "-static-libgcc" "-static-libstdc++")
 endif()
@@ -48,6 +50,8 @@ else()
 endif()
 
 #Link executable
+target_link_libraries(BitCrypt -static)
+target_link_libraries(BitCrypt Threads::Threads)
 target_link_libraries(BitCrypt App)
 target_link_libraries(BitCrypt ${wxWidgets_LIBRARIES})
 target_link_libraries(BitCrypt ${ADDITIONAL_LIBS})
