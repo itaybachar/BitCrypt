@@ -42,9 +42,9 @@ add_subdirectory(src)
 
 #Create exe
 if(APPLE)
-  set(MACOSX_BUNDLE_ICON icon.icns)
+  set(MACOSX_BUNDLE_ICON_FILE icon.icns)
   set_source_files_properties(res/icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-  add_executable(BitCrypt MACOSX_BUNDLE src/app/App.cc)
+  add_executable(BitCrypt MACOSX_BUNDLE res/icon.icns src/app/App.cc)
 else()
   add_executable(BitCrypt src/app/App.cc)
 endif()
