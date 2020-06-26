@@ -50,7 +50,10 @@ else()
 endif()
 
 #Link executable
-target_link_libraries(BitCrypt -static)
+if(WIN32 OR APPLE)
+	target_link_libraries(BitCrypt -static)
+endif()
+
 target_link_libraries(BitCrypt Threads::Threads)
 target_link_libraries(BitCrypt App)
 target_link_libraries(BitCrypt ${wxWidgets_LIBRARIES})
