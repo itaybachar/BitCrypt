@@ -50,7 +50,7 @@ else()
 endif()
 
 #Link executable
-if(WIN32 OR APPLE)
+if(WIN32)
 	target_link_libraries(BitCrypt -static)
 endif()
 

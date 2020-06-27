@@ -69,6 +69,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wx
   menu->SetBackgroundColour(menuBarCol);
   menu->SetForegroundColour(textCol);
 
+#ifndef __APPLE__
   browseButton->SetBackgroundColour(buttonsCol);
   browseButton->SetForegroundColour(textCol);
   checkFileButton->SetBackgroundColour(buttonsCol);
@@ -77,6 +78,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Bit Crypt: File Locker", wx
   encFileButton->SetForegroundColour(textCol);
   decFileButton->SetBackgroundColour(buttonsCol);
   decFileButton->SetForegroundColour(textCol);
+#endif
 
   fileTree->SetBackgroundColour(buttonsCol);
   fileTree->SetForegroundColour(textCol);
