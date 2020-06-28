@@ -1,2 +1,2 @@
 1) chmod +x autoInstall.sh
-2) sudo autoInstall.sh
+2) sudo ./autoInstall.sh
