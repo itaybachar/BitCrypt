@@ -40,6 +40,16 @@ Install Executable
 sudo make install
 ```
 
+### Installing using Binaries
+#### Linux
+1)Unzip the BitCrypt.tar file anywhere on your computer.
+2)Follow instructions to install the program.
+
+#### MacOS
+1)Follow the steps from this [article](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac) to allow unidentified developers.
+
+2)extract the zip file and move BitCrypt.app into your local Applications folder
+
 ### Unintalling
 
 After installing the project a cmake_install.cmake file will be created in the Build folder.
