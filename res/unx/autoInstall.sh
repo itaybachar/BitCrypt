@@ -1,4 +1,4 @@
-!#/bin/bash
+#!/bin/bash
 
 #Move Executable and change permissions
 echo Install started...
